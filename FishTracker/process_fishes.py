@@ -46,11 +46,10 @@ def plot_smooth_eodf(clean_fishes, ax, bin_width=0.05):
 
 def plot_fundamentals(fishes, ax, ystart):
     for fish in range(len(fishes)):
-        if len(fishes[fish][~np.isnan(fishes[fish])])>= 50:
-            ax.plot((np.arange(len(fishes[fish])) * 0.1 + ystart) / 60., fishes[fish], '.k', markersize=2)
+        ax.plot((np.arange(len(fishes[fish])) * 1.024 + ystart) / 60., fishes[fish], '.k', markersize=2)
     ax.set_xlabel('time [min]')
     ax.set_ylabel('frequency [Hz]')
-    ystart += len(fishes[0]) * 0.1
+    ystart += 900
     return ystart
 
 def fish_freq_distibution(fishes):
@@ -64,6 +63,22 @@ def fish_freq_distibution(fishes):
     # quit()
     return clean_fishes
 
+def combine_fishes(all_fishes):
+    # all_fishes[snippet][fish array]
+    fishes = all_fishes[0]
+
+    for snippet in range(1, len(all_fishes)):
+        for fish in range(len(all_fishes[snippet])):
+            fish_last_f = np.array([fishes[i][-1] for i in range(len(fishes))])
+            diff = abs(fish_last_f - all_fishes[snippet][fish][0])
+            if diff[np.argsort(diff)[0]] < 3.:
+                fishes[np.argsort(diff)[0]] = np.concatenate((fishes[np.argsort(diff)[0]], all_fishes[snippet][fish]))
+            else:
+                fishes.append(all_fishes[snippet][fish])
+
+    return fishes
+
+
 def main(filepath):
 
     file_counts = len(glob.glob(filepath + '/*.p'))
@@ -71,6 +86,7 @@ def main(filepath):
     fig, ax = plt.subplots()
     # fig2, ax2 = plt.subplots()
     ystart = 0.
+    all_clean_fishes =[]
     for eNum, f_no in enumerate(np.arange(file_counts)+1):
         f = open(filepath + '/%0.f.p' % f_no, 'rb')
         fishes = pickle.load(f)
@@ -82,8 +98,7 @@ def main(filepath):
             plt.pause(0.001)
 
             clean_fishes = fish_freq_distibution(fishes)
-
-            # plot_smooth_eodf(clean_fishes, ax2)
+            all_clean_fishes.append(clean_fishes)
 
             f.close()
             del f
@@ -92,6 +107,10 @@ def main(filepath):
 
             # if eNum > 3:
             #     quit()
+    sorted_fishes = combine_fishes(all_clean_fishes)
+    embed()
+    quit()
+
     plt.show()
 
 if __name__ == '__main__':
