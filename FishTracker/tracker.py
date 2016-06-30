@@ -8,9 +8,10 @@ import powerspectrum as ps
 import harmonicgroups as hg
 import config_tools as ct
 from IPython import embed
+import matplotlib.mlab as mlab
 import pickle
 import glob
-import time
+# import time
 
 # function to speperate one fish into two when there are to many nans in between.
 
@@ -69,49 +70,57 @@ def sort_fishes(all_fundamentals):
 
     return fishes
 
+def spectogram(data, samplerate, fresolution=0.5, detrend=mlab.detrend_none, window=mlab.window_hanning, overlap=0.5,
+               pad_to=None, sides='default', scale_by_freq=None):
+    nfft = int(np.round(2 ** (np.floor(np.log(samplerate / fresolution) / np.log(2.0)) + 1.0)))
+    if nfft < 16:
+        nfft = 16
+    noverlap = nfft*overlap
+    spectrum, freqs, time = mlab.specgram(data, NFFT=nfft, Fs=samplerate, detrend=detrend, window=window,
+                                          noverlap=noverlap, pad_to=pad_to, sides=sides, scale_by_freq=scale_by_freq)
+
+    return spectrum, freqs, time
+
 def main(audio_file):
+    import time
     cfg = ct.get_config_dict()
-
-    # load file
-    # data, samplrate, unit = dl.load_data(audio_file)    #### THIS IS WORKING !!!
-
-    # with dl.open_data(audio_file, 0, 60.0, 10.0) as data:     #### THIS IS SUPRESSING THE ERRORS
-    #     samplrate = data.samplerate
 
     data = dl.open_data(audio_file, 0, 60.0, 10.0)    ### THIS BRINGS ERRORS
     samplrate = data.samplerate
 
-    # fig, ax = plt.subplots()
     idx = 0
     all_fundamentals = []
-    t0 = time.time()
-    while idx < int((len(data)-8*samplrate) / samplrate):
+    loop = 1.
+    while idx < int((len(data)-900*samplrate) / samplrate):
 
-        tmp_data = data[idx*samplrate : (idx+8)*samplrate]
-        psd_data = ps.multi_resolution_psd(tmp_data, samplrate)
-        fishlist = hg.harmonic_groups(psd_data[1], psd_data[0], cfg)[0]
+        tmp_data = data[idx*samplrate : (idx+908)*samplrate]
+        print('data loaded ...')
 
-        if not fishlist == []:
-            fundamentals = hg.extract_fundamental_freqs(fishlist)
-            all_fundamentals.append(fundamentals)
-            # ax.plot(np.ones(len(fundamentals)) * idx, fundamentals, 'k.')
-            # plt.draw()
-            # plt.pause(0.001)
-        else:
-            all_fundamentals.append(np.array([]))
+        spectrum, freqs, time = spectogram(tmp_data, samplrate)
+        # psd_data = ps.multi_resolution_psd(tmp_data, samplrate)
+        print('spectogramm calculated ...')
 
-        # print idx
-        if idx % 1800 < 0.1 and not idx == 0.0:
-            print('%.1f sec; Processing 30 min took %.2f sec.' % (idx, time.time() - t0))
-            t0 = time.time()
-            # print idx
-            fishes = sort_fishes(all_fundamentals)
-            # pickle save function
-            pickle_save(fishes)
-            all_fundamentals = []
+        for t in range(len(time)-7):
+            power = np.mean(spectrum[:, t:t+8], axis=1)
 
-        idx += 0.1
+            fishlist = hg.harmonic_groups(freqs, power, cfg)[0]
+
+            if not fishlist == []:
+                fundamentals = hg.extract_fundamental_freqs(fishlist)
+                all_fundamentals.append(fundamentals)
+            else:
+                all_fundamentals.append(np.array([]))
+
+        print('Loop %0.f: Processed %0.f minutes ... continue...' % (loop, loop*15))
+        loop +=1
+        fishes = sort_fishes(all_fundamentals)
+        pickle_save(fishes)
+        all_fundamentals = []
+
+        idx += 900.
+
     fishes = sort_fishes(all_fundamentals)
+    print('Whole file processed!')
 
 if __name__ == '__main__':
     print('TRACK ALL THE FISHES')
