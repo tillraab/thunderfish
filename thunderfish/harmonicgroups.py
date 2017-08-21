@@ -318,10 +318,14 @@ def build_harmonic_group(freqs, more_freqs, deltaf, verbose=0, min_freq=20.0, ma
             continue
 
         # ratio of total fill-ins too large:
-        if float(fill_ins) / float(len(newmoregroup)) > max_fill_ratio:
+        if len(newmoregroup) == 0 or float(fill_ins) / float(len(newmoregroup)) > max_fill_ratio:
             if verbose > 1:
-                print('discarded group because of too many fill ins! %d from %d (%g)' %
-                      (fill_ins, len(newmoregroup), float(fill_ins) / float(len(newmoregroup))), newmoregroup)
+                if len(newmoregroup) == 0:
+                    print('discarded group because newmoregroup is empty! %d from %d' %
+                          (fill_ins, len(newmoregroup)))
+                else:
+                    print('discarded group because of too many fill ins! %d from %d (%g)' %
+                          (fill_ins, len(newmoregroup), float(fill_ins) / float(len(newmoregroup))), newmoregroup)
             continue
 
         # REASSEMBLE NEW GROUP BECAUSE FZERO MIGHT HAVE CHANGED AND
@@ -846,11 +850,12 @@ def fundamental_freqs(group_list):
         fundamentals = np.array([group[0, 0] for group in group_list if len(group) > 0])
     else:
         fundamentals = []
+        fund_power = []
         for groups in group_list:
+
             f = fundamental_freqs(groups)
             fundamentals.append(f)
     return fundamentals
-
 
 def fundamental_freqs_and_power(group_list, n_harmonics=1, power=False,
                                 ref_power=1.0, min_power=1e-20):
