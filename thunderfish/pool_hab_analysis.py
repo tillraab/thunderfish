@@ -291,39 +291,6 @@ def main():
     # shift = [0, 5760, 12840, 72420, 169440, 204840, 243900, 255360, 270240, 335400, 362400, 418440, 445380, 505200, 543240, 592740, 630660, 678780, 713700, 765540, 802680, 852840, 1559460, 2161500]
     shift = [0, 5760, 12840, 72420, 169440, 204840, 243900, 255360, 270240, 335400, 362400, 418440, 445380, 505200, 543240, 592740, 630660, 678780, 713700, 765540, 802680, 852840]
 
-    #  Datei   1        2         3      4       5       6      7       8        9      10      11     12      13       14     15      16      17      18      19      20       21      22      23     24
-    # fish_nr_in_rec = [[7314  , 2071  , 107834, 157928, 8     , 2     , 18372 , 4     , 4     , 0     , 7     , 5     , 6     , 50283 , 21    , 28    , 7     , 11    , 19    , 76    , np.nan, 0     , 12    , 9     ],
-    #                   [88    , 3541  , 107833, 158010, 16501 , 8     , 17287 , 26    , 32478 , 1     , 31    , 2     , 11    , 4     , 29496 , 6     , 19    , 37560 , 24    , 3     , np.nan, 4     , 123281, 164289],
-    #                   [7315  , 9103  , 107256, 158179, 3     , 45    , 7     , 3     , 3     , 25208 , 32881 , 38054 , 47218 , 66437 , 9402  , 56948 , 6     , 50447 , 90962 , 45002 , np.nan, 3     , 4     , 31274 ],
-    #                   [4627  , 9102  , 107832, 158205, 1     , 3     , 2514  , 2     , 10    , 32    , 47    , 25482 , 12638 , 66841 , 53    , 56949 , 25745 , 57594 , 24839 , 62328 , np.nan, 7     , 2     , 152249],
-    #                   [np.nan, np.nan, np.nan, np.nan, np.nan, np.nan, np.nan, np.nan, np.nan, np.nan, np.nan, 38916 , 8     , 46503 , 15    , 26    , 9     , 57152 , 75735 , 45    , np.nan, 24409 , 8     , 3     ],
-    #                   [np.nan, np.nan, np.nan, np.nan, np.nan, np.nan, np.nan, np.nan, np.nan, np.nan, np.nan, 23554 , 38328 , np.nan, 2     , 4     , 41729 , 55107 , 7     , 84    , np.nan, 3810  , 6     , 2     ],
-    #                   [np.nan, np.nan, np.nan, np.nan, np.nan, np.nan, np.nan, np.nan, np.nan, np.nan, np.nan, np.nan, np.nan, np.nan, np.nan, 3155  , 2144  , 12    , 2     , 7     , np.nan, 1     , 124425, 164278],
-    #                   [np.nan, np.nan, np.nan, np.nan, np.nan, np.nan, np.nan, np.nan, np.nan, np.nan, np.nan, np.nan, np.nan, 1104  , 18    , 5     , 10973 , 57578 , 42    , 81580 , np.nan, 21    , 72486 , 164288],
-    #                   [np.nan, np.nan, np.nan, np.nan, np.nan, np.nan, np.nan, np.nan, np.nan, 4516  , 8     , 4     , 3     , 1     , 25    , 11411 , 3     , 57579 , 21618 , 247   , np.nan, 2     , 120610, 5     ],
-    #                   [np.nan, np.nan, np.nan, np.nan, np.nan, np.nan, np.nan, np.nan, np.nan, np.nan, np.nan, np.nan, np.nan, 65093 , 59600 , 44    , 0     , 42932 , 6     , 108   , np.nan, 39100 , 5     , 54975 ],
-    #                   [np.nan, np.nan, np.nan, np.nan, np.nan, np.nan, 15004 , 24342 , 27327 , 34423 , 2     , 1099  , 4     , 31613 , 8     , 7865  , 4272  , 57593 , 3394  , 74472 , np.nan, 12    , 10    , 1     ],
-    #                   [np.nan, np.nan, np.nan, np.nan, np.nan, np.nan, np.nan, np.nan, np.nan, 39778 , np.nan, 1227  , 2     , 6     , 59560 , 1878  , 81    , 57592 , np.nan, 29543 , np.nan, 37650 , 46043 , 56279 ],
-    #                   [np.nan, np.nan, np.nan, np.nan, np.nan, np.nan, np.nan, np.nan, np.nan, np.nan, np.nan, np.nan, np.nan, np.nan, np.nan, 56947 , 38877 , 8     , 34    , 12405 , np.nan, 25536 , 15    , 0     ],
-    #                   [np.nan, np.nan, np.nan, np.nan, np.nan, np.nan, 17544 , 47    , 31    , 14    , 26840 , 10    , 63    , 48125 , 146   , 56950 , 39918 , 6     , 25858 , 6     , np.nan, 189   , 134   , 11    ]]
-
-    # fish_nr_in_rec = [
-    #     [7314, 2071, 107834, 157928, 8, 2, 18372, 4, 4, 0, 7, 5, 6, 50283, 21, 28, 7, 11, 19, 76, 0, 0, 12, 9],
-    #     [88, 3541, 107833, 158010, 16501, 8, 17287, 26, 32478, 1, 31, 2, 11, 4, 29496, 6, 19, 37560, 24, 3, 37192, 4, 123281, 164289],
-    #     [7315, 9103, 107256, 158179, 3, 45, 7, 3, 3, 25208, 32881, 38054, 47218, 66437, 9402, 56948, 6, 50447, 90962, 45002, 217, 3, 4, 31274],
-    #     [4627, 9102, 107832, 158205, 1, 3, 2514, 2, 10, 32, 47, 25482, 12638, 66841, 53, 56949, 25745, 57594, 24839, 62328, 6, 24409, 8, 3],
-    #     [np.nan, np.nan, np.nan, np.nan, np.nan, np.nan, np.nan, np.nan, np.nan, np.nan, np.nan, 38916, 8, 46503, 15, 26, 9, 57152, 75735, 45, 24367, 7, 2, 152249],
-    #     [np.nan, np.nan, np.nan, np.nan, np.nan, np.nan, np.nan, np.nan, np.nan, np.nan, np.nan, 23554, 38328, np.nan, 2, 4, 41729, 55107, 7, 84, 16706, 3810, 6, 2],
-    #     [np.nan, np.nan, np.nan, np.nan, np.nan, np.nan, np.nan, np.nan, np.nan, np.nan, np.nan, np.nan, np.nan, np.nan, np.nan, 3155, 2144, 12, 2, 7, 117, 1, 124425, 164278],
-    #     [np.nan, np.nan, np.nan, np.nan, np.nan, np.nan, np.nan, np.nan, np.nan, np.nan, np.nan, np.nan, np.nan, 1104, 18, 5, 10973, 57578, 42, 81580, 86637, 21, 72486, 164288],
-    #     [np.nan, np.nan, np.nan, np.nan, np.nan, np.nan, np.nan, np.nan, np.nan, 4516, 8, 4, 3, 1, 25, 11411, 3, 57579, 21618, 247, 28786, 2, 120610, 5],
-    #     [np.nan, np.nan, np.nan, np.nan, np.nan, np.nan, np.nan, np.nan, np.nan, np.nan, np.nan, np.nan, np.nan, 65093, 59600, 44, 0, 42932, 6, 108, 8, 39100, 5, 54975],
-    #     [np.nan, np.nan, np.nan, np.nan, np.nan, np.nan, 15004, 24342, 27327, 34423, 2, 1099, 4, 31613, 8, 7865, 4272, 57593, 3394, 74472, 3, 12, 10, 1],
-    #     [np.nan, np.nan, np.nan, np.nan, np.nan, np.nan, np.nan, np.nan, np.nan, 39778, np.nan, 1227, 2, 6, 59560, 1878, 81, 57592, np.nan, 29543, 16994, 37650, 46043, 56279],
-    #     [np.nan, np.nan, np.nan, np.nan, np.nan, np.nan, np.nan, np.nan, np.nan, np.nan, np.nan, np.nan, np.nan, np.nan, np.nan, 56947, 38877, 8, 34, 12405, 388, 25536, 15, 0],
-    #     [np.nan, np.nan, np.nan, np.nan, np.nan, np.nan, 17544, 47, 31, 14, 26840, 10, 63, 48125, 146, 56950, 39918, 6, 25858, 6, 88393, 189, 134, 11]]
-
-
     fish_nr_in_rec = [
         [7314, 2071, 107834, 157928, 8, 2, 18372, 4, 4, 0, 7, 5, 6, 50283, 21, 28, 7, 11, 19, 76, 0, 0],
         [88, 3541, 107833, 158010, 16501, 8, 17287, 26, 32478, 1, 31, 2, 11, 4, 29496, 6, 19, 37560, 24, 3, 37192, 4],
@@ -354,7 +321,6 @@ def main():
 
     for datafile_nr in range(len(datafile)):
         fish_f, fish_p, t = extract_freq_and_pos_array(datafile[datafile_nr], shift, fish_nr_in_rec, datafile_nr)
-
         if datafile_nr == 0:
             fish_freqs = fish_f
             fish_pos = fish_p
@@ -369,38 +335,7 @@ def main():
 
     night_mask = np.arange(len(clock_sec))[(clock_sec >= start_n) & (clock_sec < end_n)]
     day_mask = np.arange(len(clock_sec))[(clock_sec < start_n) | (clock_sec >= end_n)]
-    ################################## ANNA ###############################################
-    # df_on_electrode = [[] for elec in range(16)]
-    # d_df_on_electrode = [[] for elec in range(16)]
-    # n_df_on_electrode = [[] for elec in range(16)]
-    #
-    # # for fish_nr in tqdm(range(len(fish_freqs))):
-    # for fish_nr in range(len(fish_freqs)):
-    #     for fish_nr_comp in np.arange(fish_nr+1, len(fish_freqs)):
-    #         for elec in range(16):
-    #             fish_freq_oi = fish_freqs[fish_nr][(fish_pos[fish_nr] == elec) & (fish_pos[fish_nr_comp] == elec)]
-    #             d_fish_freq_oi = fish_freqs[fish_nr][day_mask][ (fish_pos[fish_nr][day_mask] == elec) & (fish_pos[fish_nr_comp][day_mask] == elec)]
-    #             n_fish_freq_oi = fish_freqs[fish_nr][night_mask][ (fish_pos[fish_nr][night_mask] == elec) & (fish_pos[fish_nr_comp][night_mask] == elec)]
-    #
-    #             comp_fish_freq_oi = fish_freqs[fish_nr_comp][(fish_pos[fish_nr] == elec) & (fish_pos[fish_nr_comp] == elec)]
-    #             d_comp_fish_freq_oi = fish_freqs[fish_nr_comp][day_mask][(fish_pos[fish_nr][day_mask] == elec) & (fish_pos[fish_nr_comp][day_mask] == elec)]
-    #             n_comp_fish_freq_oi = fish_freqs[fish_nr_comp][night_mask][(fish_pos[fish_nr][night_mask] == elec) & (fish_pos[fish_nr_comp][night_mask] == elec)]
-    #
-    #             df_on_electrode[elec].extend(np.abs(fish_freq_oi - comp_fish_freq_oi))
-    #             d_df_on_electrode[elec].extend(np.abs(d_fish_freq_oi - d_comp_fish_freq_oi))
-    #             n_df_on_electrode[elec].extend(np.abs(n_fish_freq_oi - n_comp_fish_freq_oi))
-    #
-    # df_in_habitat = [[] for habitat in habitats]
-    # d_df_in_habitat = [[] for habitat in habitats]
-    # n_df_in_habitat = [[] for habitat in habitats]
-    #
-    # for hab_nr in range(len(habitats)):
-    #     for elec in habitats[hab_nr]:
-    #         df_in_habitat[hab_nr].extend(df_on_electrode[elec])
-    #         d_df_in_habitat[hab_nr].extend(d_df_on_electrode[elec])
-    #         n_df_in_habitat[hab_nr].extend(n_df_on_electrode[elec])
 
-    ################################## LAURA ###############################################
     dn_borders = np.arange(110 * 60, 2250000 + 12 * 60 * 60, 12 * 60 * 60)
 
 
@@ -509,60 +444,6 @@ def main():
         else:
             rel_n_fish_counts_in_habitat[fish_nr] = n_fish_counts_in_habitat[fish_nr] / np.sum(n_fish_counts_in_habitat[fish_nr])
 
-    # bw = 5.
-    # hab_names = ['stacked stones', 'stone canyon', 'plants', 'sand', 'water surface']
-    # for hab_nr in range(len(df_in_habitat)):
-    #     # h, bin_edges = np.histogram(df_in_habitat[hab_nr], bins = np.arange(0, 250 + bw, bw))
-    #     # centers = bin_edges[:-1] + ((bin_edges[1] - bin_edges[0]) / bw)
-    #     # h = h / np.sum(h) / bw
-    #
-    #     fig, ax = plt.subplots(facecolor='white', figsize=(20/2.54, 12/2.54))
-    #     # ax.fill_between(centers, h, color='grey', alpha= 0.2, label='all dfs')
-    #
-    #     h, bin_edges = np.histogram(d_df_in_habitat[hab_nr], bins=np.arange(0, 250 + bw, bw))
-    #     centers = bin_edges[:-1] + ((bin_edges[1] - bin_edges[0]) / bw)
-    #     h = h / np.sum(h) / bw
-    #     d_med = np.median(d_df_in_habitat[hab_nr])
-    #
-    #     ax.plot(centers, h, color = 'orange', label= '$\Delta$fs Tag')
-    #
-    #     h, bin_edges = np.histogram(n_df_in_habitat[hab_nr], bins=np.arange(0, 250 + bw, bw))
-    #     centers = bin_edges[:-1] + ((bin_edges[1] - bin_edges[0]) / bw)
-    #     h = h / np.sum(h) / bw
-    #     n_med = np.median(n_df_in_habitat[hab_nr])
-    #
-    #     ax.plot(centers, h, color= 'k', label= '$\Delta$fs Nacht')
-    #
-    #     ylims = ax.get_ylim()
-    #     ax.plot([d_med, d_med], [ylims[0], ylims[1]], '--', color='orange', label='Median Tag')
-    #     ax.plot([n_med, n_med], [ylims[0], ylims[1]], '--', color='k', label='Median Nacht')
-    #
-    #     #ax.set_title(hab_names[hab_nr])
-    #     ax.set_ylabel('relative Häufigkeit')#ax.set_ylabel('rel. occurance')                                                                             #TODO
-    #     ax.set_xlabel('Frequenzdifferenz [Hz]')
-    #
-    #     plt.legend()
-    #     plt.tight_layout()
-        # fig.savefig(saving_folder + 'df_in_%s.pdf' % hab_names[hab_nr])
-        # plt.close()
-
-    # fig, ax = plt.subplots(facecolor='white', figsize=(20/2.54, 12/2.54))
-    # for fish_nr in range(len(rel_fish_counts_in_habitat)):
-    #     # embed()
-    #     upshift = 0
-    #     if np.sum(rel_fish_counts_in_habitat[fish_nr]) == 0:
-    #         continue
-    #     for hab_nr in range(len(rel_fish_counts_in_habitat[fish_nr])):
-    #         ax.bar(fish_nr, rel_fish_counts_in_habitat[fish_nr][hab_nr], bottom = upshift, color=hab_colors[hab_nr])
-    #         upshift += rel_fish_counts_in_habitat[fish_nr][hab_nr]
-    #     ax.set_title('total occupation of habitats')
-    #     ax.set_xlabel('fish Nr.')
-    #     ax.set_ylabel('rel. occurance in habitat')
-    #     # ax.set_ylim([0, 1])
-    # plt.tight_layout()
-    # fig.savefig(saving_folder + 'total_occupation_in_habitats_all.pdf')
-    # plt.close()
-
     embed()
     quit()
     ################################## paper figures #################################
@@ -615,9 +496,281 @@ def main():
         mdhc.append(np.mean(d_hab_changes[fish_nr]))
         sdhc.append(np.std(d_hab_changes[fish_nr]))
 
+
+    # REVIEW ADAPTATIONS # 1
+    n_mask = np.full(len(times), False)
+    for ns, ne in zip(dn_borders[::2], dn_borders[1::2]):
+        n_mask[(times >= ns) & (times < ne)] = True
+
     hab_fish_count = []
+    hab_male_count = []
+    hab_female_count = []
+
+    fish_in_group_size = np.full(np.shape(fish_hab), np.nan) # wir n other fish (m and f)
+    male_with_n_male = np.full((6, np.shape(fish_hab)[1]), np.nan) # with n other male
+    male_with_n_female = np.full((6, np.shape(fish_hab)[1]), np.nan) # with n other male
+
+    female_with_n_female = np.full((8, np.shape(fish_hab)[1]), np.nan) # with n other female
+    female_with_n_male = np.full((8, np.shape(fish_hab)[1]), np.nan) # with n other female
+
     for hab in range(5):
         hab_fish_count.append(np.sum(np.array(fish_hab) == hab, axis= 0))
+        help = np.sum(np.array(fish_hab) == hab, axis= 0)[np.where(fish_hab == hab)[1]]
+        fish_in_group_size[np.where(fish_hab == hab)] = help
+
+        hab_male_count.append(np.sum(np.array(fish_hab[:6]) == hab, axis= 0))
+        help = np.sum(np.array(fish_hab)[:6] == hab, axis= 0)[np.where(fish_hab[:6] == hab)[1]]
+        male_with_n_male[np.where(fish_hab[:6] == hab)] = help
+
+        help = np.sum(np.array(fish_hab)[:6] == hab, axis= 0)[np.where(fish_hab[6:] == hab)[1]]
+        female_with_n_male[np.where(fish_hab[6:] == hab)] = help
+
+        hab_female_count.append(np.sum(np.array(fish_hab[6:]) == hab, axis= 0))
+        help = np.sum(np.array(fish_hab)[6:] == hab, axis= 0)[np.where(fish_hab[6:] == hab)[1]]
+        female_with_n_female[np.where(fish_hab[6:] == hab)] = help
+
+        help = np.sum(np.array(fish_hab)[6:] == hab, axis= 0)[np.where(fish_hab[:6] == hab)[1]]
+        male_with_n_female[np.where(fish_hab[:6] == hab)] = help
+
+    male_grouping = [[], [], [], [], [], []]
+    d_male_grouping = [[], [], [], [], [], []]
+    n_male_grouping = [[], [], [], [], [], []]
+
+    female_grouping = [[], [], [], [], [], []]
+    d_female_grouping = [[], [], [], [], [], []]
+    n_female_grouping = [[], [], [], [], [], []]
+    for n in np.arange(len(fish_hab))+1:
+        male_grouping[0].append(len(np.hstack(hab_male_count)[np.hstack(hab_male_count) == n]))
+        d_male_grouping[0].append(len(np.hstack(np.array(hab_male_count)[:, ~n_mask])[np.hstack(np.array(hab_male_count)[:, ~n_mask]) == n]))
+        n_male_grouping[0].append(len(np.hstack(np.array(hab_male_count)[:, n_mask])[np.hstack(np.array(hab_male_count)[:, n_mask]) == n]))
+
+        female_grouping[0].append(len(np.hstack(hab_female_count)[np.hstack(hab_female_count) == n]))
+        d_female_grouping[0].append(len(np.hstack(np.array(hab_female_count)[:, ~n_mask])[np.hstack(np.array(hab_female_count)[:, ~n_mask]) == n]))
+        n_female_grouping[0].append(len(np.hstack(np.array(hab_female_count)[:, n_mask])[np.hstack(np.array(hab_female_count)[:, n_mask]) == n]))
+
+        for hab_nr in range(5):
+            male_grouping[hab_nr+1].append(len(hab_male_count[hab_nr][hab_male_count[hab_nr] == n]))
+            d_male_grouping[hab_nr+1].append(len(hab_male_count[hab_nr][~n_mask][hab_male_count[hab_nr][~n_mask] == n]))
+            n_male_grouping[hab_nr+1].append(len(hab_male_count[hab_nr][n_mask][hab_male_count[hab_nr][n_mask] == n]))
+
+
+            female_grouping[hab_nr+1].append(len(hab_female_count[hab_nr][hab_female_count[hab_nr] == n]))
+            d_female_grouping[hab_nr+1].append(len(hab_female_count[hab_nr][~n_mask][hab_female_count[hab_nr][~n_mask] == n]))
+            n_female_grouping[hab_nr+1].append(len(hab_female_count[hab_nr][n_mask][hab_female_count[hab_nr][n_mask] == n]))
+
+    male_grouping = np.array(male_grouping)
+    d_male_grouping = np.array(d_male_grouping)
+    n_male_grouping = np.array(n_male_grouping)
+
+    female_grouping = np.array(female_grouping)
+    d_female_grouping = np.array(d_female_grouping)
+    n_female_grouping = np.array(n_female_grouping)
+
+    n = np.arange(len(fish_hab))+1
+
+    ### grouping all ###
+    fig, ax = plt.subplots(3, 2, figsize=(20/2.54, 20/2.54), facecolor='white') # ToDo: for single habitats
+    ax = np.hstack(ax)
+    txt = ['all', 'stacked stones', 'canyon', 'plants', 'gravel', 'open water']
+
+    for i in range(len(ax)):
+        ax[i].bar(n-.15, d_male_grouping[i] / (np.sum(d_male_grouping[i]) + np.sum(d_female_grouping)), width = .1, color='cornflowerblue')
+        ax[i].plot(n, d_male_grouping[i] / (np.sum(d_male_grouping[i]) + np.sum(d_female_grouping)) * n, color='cornflowerblue', marker='.', label='day male')
+
+        ax[i].bar(n-.05, n_male_grouping[i] / (np.sum(n_male_grouping[i]) + np.sum(n_female_grouping)), width = .1, color='blue')
+        ax[i].plot(n, n_male_grouping[i] / (np.sum(n_male_grouping[i]) + np.sum(n_female_grouping)) * n, color='blue', marker='.', label='night male')
+
+        ax[i].bar(n+.05, d_female_grouping[i] / (np.sum(d_female_grouping[i]) + np.sum(d_male_grouping)), width = .1, color='pink')
+        ax[i].plot(n, d_female_grouping[i] / (np.sum(d_female_grouping[i]) + np.sum(d_male_grouping)) * n, color='pink', marker='.', label='day female')
+
+        ax[i].bar(n+.15, n_female_grouping[i] / (np.sum(n_female_grouping[i]) + np.sum(n_male_grouping)), width = .1, color='firebrick')
+        ax[i].plot(n, n_female_grouping[i] / (np.sum(n_female_grouping[i]) + np.sum(n_male_grouping)) * n, color='firebrick', marker='.', label='night female')
+
+        ax[i].text(8, .02, txt[i], va='center', ha='center')
+        ax[i].set_xlim([0, 10])
+        # ax[i].set_ylim([0, .3])
+        ax[i].set_xticks(np.arange(10)+1)
+        ax[i].legend(loc=1, frameon=False, fontsize=8)
+
+    ax[4].set_xlabel('group size')
+    ax[5].set_xlabel('group size')
+    ax[0].set_ylabel('probability')
+    ax[2].set_ylabel('probability')
+    ax[4].set_ylabel('probability')
+
+    ### grouping same sex ###
+
+    fig, ax = plt.subplots(3, 2, figsize=(20/2.54, 20/2.54), facecolor='white') # ToDo: for single habitats
+    ax = np.hstack(ax)
+    txt = ['all', 'stacked stones', 'canyon', 'plants', 'gravel', 'open water']
+
+    for i in range(len(ax)):
+        ax[i].bar(n-.15, d_male_grouping[i] / np.sum(d_male_grouping[i]), width = .1, color='cornflowerblue')
+        ax[i].plot(n, d_male_grouping[i] / np.sum(d_male_grouping[i]) * n, color='cornflowerblue', marker='.', label='day male')
+
+        ax[i].bar(n-.05, n_male_grouping[i] / np.sum(n_male_grouping[i]), width = .1, color='blue')
+        ax[i].plot(n, n_male_grouping[i] / np.sum(n_male_grouping[i]) * n, color='blue', marker='.', label='night male')
+
+        ax[i].bar(n+.05, d_female_grouping[i] / np.sum(d_female_grouping[i]), width = .1, color='pink')
+        ax[i].plot(n, d_female_grouping[i] / np.sum(d_female_grouping[i]) * n, color='pink', marker='.', label='day female')
+
+        ax[i].bar(n+.15, n_female_grouping[i] / np.sum(n_female_grouping[i]), width = .1, color='firebrick')
+        ax[i].plot(n, n_female_grouping[i] / np.sum(n_female_grouping[i]) * n, color='firebrick', marker='.', label='night female')
+
+        ax[i].text(8, .1, txt[i], va='center', ha='center')
+        ax[i].set_xlim([0, 10])
+        ax[i].set_ylim([0, 1])
+        ax[i].set_xticks(np.arange(10)+1)
+        ax[i].legend(loc=1, frameon=False, fontsize=8)
+
+    ax[4].set_xlabel('group size')
+    ax[5].set_xlabel('group size')
+    ax[0].set_ylabel('probability')
+    ax[2].set_ylabel('probability')
+    ax[4].set_ylabel('probability')
+
+
+    ### fish ID group size ###
+
+    group_size_per_id_night = []
+    group_size_per_id_day = []
+    for i in range(len(fish_in_group_size)):
+        group_size_per_id_day.append(fish_in_group_size[i][~n_mask][~np.isnan(fish_in_group_size[i][~n_mask])])
+        group_size_per_id_night.append(fish_in_group_size[i][n_mask][~np.isnan(fish_in_group_size[i][n_mask])])
+
+    fig, ax = plt.subplots(3, 1, figsize=(20/2.54, 20/2.54))
+    ax = np.hstack(ax)
+    ax[0].errorbar(np.arange(14)+1-0.1, list(map(lambda x: np.mean(x), group_size_per_id_day)), yerr=list(map(lambda x: np.std(x), group_size_per_id_day)), fmt='none', ecolor='grey')
+    ax[0].plot(np.arange(14)+1-0.1, list(map(lambda x: np.mean(x), group_size_per_id_day)), 'o', color='grey')
+
+    ax[0].errorbar(np.arange(14)+1+0.1, list(map(lambda x: np.mean(x), group_size_per_id_night)), yerr=list(map(lambda x: np.std(x), group_size_per_id_night)), ecolor='k', fmt='none')
+    ax[0].plot(np.arange(14)+1+0.1, list(map(lambda x: np.mean(x), group_size_per_id_night)), 'o', color='k')
+
+    ax[0].set_xticks(np.arange(14) +1)
+    ax[0].set_xlabel('Fish ID')
+    ax[0].set_ylabel('total individuals')
+    ax[0].set_title('group size and composition')
+
+    n_male_per_male_night = []
+    n_male_per_male_day = []
+    for i in range(len(male_with_n_male)):
+        n_male_per_male_day.append(male_with_n_male[i][~n_mask][~np.isnan(male_with_n_male[i][~n_mask])])
+        n_male_per_male_night.append(male_with_n_male[i][n_mask][~np.isnan(male_with_n_male[i][n_mask])])
+
+    ax[1].errorbar(np.arange(6)+1-0.1, list(map(lambda x: np.mean(x), n_male_per_male_day)), yerr=list(map(lambda x: np.std(x), n_male_per_male_day)), fmt='none', ecolor='grey')
+    ax[1].plot(np.arange(6)+1-0.1, list(map(lambda x: np.mean(x), n_male_per_male_day)), 'o', color='grey')
+
+    ax[1].errorbar(np.arange(6)+1+0.1, list(map(lambda x: np.mean(x), n_male_per_male_night)), yerr=list(map(lambda x: np.std(x), n_male_per_male_night)), ecolor='k', fmt='none')
+    ax[1].plot(np.arange(6)+1+0.1, list(map(lambda x: np.mean(x), n_male_per_male_night)), 'o', color='k')
+
+    n_female_per_female_night = []
+    n_female_per_female_day = []
+    for i in range(len(female_with_n_female)):
+        n_female_per_female_day.append(female_with_n_female[i][~n_mask][~np.isnan(female_with_n_female[i][~n_mask])])
+        n_female_per_female_night.append(female_with_n_female[i][n_mask][~np.isnan(female_with_n_female[i][n_mask])])
+
+    ax[1].errorbar(np.arange(8)+1+6-0.1, list(map(lambda x: np.mean(x), n_female_per_female_day)), yerr=list(map(lambda x: np.std(x), n_female_per_female_day)), fmt='none', ecolor='grey')
+    ax[1].plot(np.arange(8)+1+6-0.1, list(map(lambda x: np.mean(x), n_female_per_female_day)), 'o', color='grey')
+
+    ax[1].errorbar(np.arange(8)+1+6+0.1, list(map(lambda x: np.mean(x), n_female_per_female_night)), yerr=list(map(lambda x: np.std(x), n_female_per_female_night)), ecolor='k', fmt='none')
+    ax[1].plot(np.arange(8)+1+6+0.1, list(map(lambda x: np.mean(x), n_female_per_female_night)), 'o', color='k')
+
+    ax[1].set_xticks(np.arange(14) +1)
+    ax[1].set_xlabel('Fish ID')
+    ax[1].set_ylabel('same sex\nindividuals')
+
+    n_female_per_male_night = []
+    n_female_per_male_day = []
+    for i in range(len(male_with_n_female)):
+        n_female_per_male_day.append(male_with_n_female[i][~n_mask][~np.isnan(male_with_n_female[i][~n_mask])])
+        n_female_per_male_night.append(male_with_n_female[i][n_mask][~np.isnan(male_with_n_female[i][n_mask])])
+
+    ax[2].errorbar(np.arange(6)+1-0.1, list(map(lambda x: np.mean(x), n_female_per_male_day)), yerr=list(map(lambda x: np.std(x), n_female_per_male_day)), fmt='none', ecolor='grey')
+    ax[2].plot(np.arange(6)+1-0.1, list(map(lambda x: np.mean(x), n_female_per_male_day)), 'o', color='grey')
+
+    ax[2].errorbar(np.arange(6)+1+0.1, list(map(lambda x: np.mean(x), n_female_per_male_night)), yerr=list(map(lambda x: np.std(x), n_female_per_male_night)), ecolor='k', fmt='none')
+    ax[2].plot(np.arange(6)+1+0.1, list(map(lambda x: np.mean(x), n_female_per_male_night)), 'o', color='k')
+
+    n_male_per_female_night = []
+    n_male_per_female_day = []
+    for i in range(len(female_with_n_male)):
+        n_male_per_female_day.append(female_with_n_male[i][~n_mask][~np.isnan(female_with_n_male[i][~n_mask])])
+        n_male_per_female_night.append(female_with_n_male[i][n_mask][~np.isnan(female_with_n_male[i][n_mask])])
+
+    ax[2].errorbar(np.arange(8)+1+6-0.1, list(map(lambda x: np.mean(x), n_male_per_female_day)), yerr=list(map(lambda x: np.std(x), n_male_per_female_day)), fmt='none', ecolor='grey')
+    ax[2].plot(np.arange(8)+1+6-0.1, list(map(lambda x: np.mean(x), n_male_per_female_day)), 'o', color='grey')
+
+    ax[2].errorbar(np.arange(8)+1+6+0.1, list(map(lambda x: np.mean(x), n_male_per_female_night)), yerr=list(map(lambda x: np.std(x), n_male_per_female_night)), ecolor='k', fmt='none')
+    ax[2].plot(np.arange(8)+1+6+0.1, list(map(lambda x: np.mean(x), n_male_per_female_night)), 'o', color='k')
+
+    ax[2].set_xticks(np.arange(14) +1)
+    ax[2].set_xlabel('Fish ID')
+    ax[2].set_ylabel('diff. sex\nindividuals')
+
+    ax[0].set_ylim([0, 7])
+    ax[1].set_ylim([0, 4.5])
+    ax[2].set_ylim([0, 4.5])
+
+    plt.tight_layout()
+
+
+    i_of_plus_fish = [0]
+    i_of_plus_fish.append(np.arange(len(hab_fish_count[0]))[np.sum(hab_fish_count, axis=0) >= 6][0])
+    i_of_plus_fish.append(np.arange(len(hab_fish_count[0]))[np.sum(hab_fish_count, axis=0) >= 8][0])
+    i_of_plus_fish.append(np.arange(len(hab_fish_count[0]))[np.sum(hab_fish_count, axis=0) >= 10][0])
+    i_of_plus_fish.append(np.arange(len(hab_fish_count[0]))[np.sum(hab_fish_count, axis=0) >= 12][0])
+    i_of_plus_fish.append(np.arange(len(hab_fish_count[0]))[np.sum(hab_fish_count, axis=0) >= 14][0])
+    i_of_plus_fish.append(len(hab_fish_count[0]))
+
+
+    ratio_day = []
+    ratio_night = []
+    # ToDo: continue here !!!
+    for hab_id in range(5):
+        ratio_day.append(hab_male_count[hab_id][~n_mask] / (hab_male_count[hab_id][~n_mask] + hab_female_count[hab_id][~n_mask]))
+        ratio_night.append(hab_male_count[hab_id][n_mask] / (hab_male_count[hab_id][n_mask] + hab_female_count[hab_id][n_mask]))
+
+        ratio_day[-1] = ratio_day[-1][~np.isnan(ratio_day[-1])]
+        ratio_night[-1] = ratio_night[-1][~np.isnan(ratio_night[-1])]
+
+    fig, ax = plt.subplots(figsize=(20/2.54, 12/2.54), facecolor='white')
+
+    ax.errorbar(np.arange(len(ratio_day)) + 1 - 0.1, list(map(lambda x: np.mean(x), ratio_day)), yerr=list(map(lambda x: np.std(x), ratio_day)), fmt='none', ecolor='grey')
+    ax.plot(np.arange(len(ratio_day)) + 1 - 0.1, list(map(lambda x: np.mean(x), ratio_day)), 'o', color='grey')
+
+    ax.errorbar(np.arange(len(ratio_night)) + 1 + 0.1, list(map(lambda x: np.mean(x), ratio_night)), yerr=list(map(lambda x: np.std(x), ratio_night)), fmt='none', ecolor='k')
+    ax.plot(np.arange(len(ratio_night)) + 1 + 0.1, list(map(lambda x: np.mean(x), ratio_night)), 'o', color='k')
+
+    ax.set_xticks(np.arange(5) + 1)
+    ax.set_xticklabels(['stacked\nstones', 'isolated\nstones', 'grass', 'gravel', 'open water'], rotation = 70)
+    ax.set_ylabel('male ratio')
+    plt.tight_layout()
+
+    # ax.boxplot(ratio_day, positions = np.arange(len(ratio_day)) + 1 - 0.1, widths = 0.2)
+    # ax.boxplot(ratio_night, positions = np.arange(len(ratio_day)) + 1 + 0.1, widths = 0.2)
+
+    # REVIEW ADAPTATIONS # 2
+
+    # mask = (male_count > 0) | (female_count > 0)
+    #
+    # m_ratio = male_count[mask] / (male_count[mask] + female_count[mask])
+    # m_unique_ratio = np.unique(m_ratio)
+    # n_m_unique_ratio = []
+    # for r in m_unique_ratio:
+    #     n_m_unique_ratio.append(len(m_ratio[m_ratio == r]))
+    #
+    # f_ratio = female_count[mask] / (male_count[mask] + female_count[mask])
+    # f_unique_ratio = np.unique(f_ratio)
+    # n_f_unique_ratio = []
+    # for r in f_unique_ratio:
+    #     n_f_unique_ratio.append(len(f_ratio[f_ratio == r]))
+    #
+    # fig, ax = plt.subplots()
+    # ax.plot(m_unique_ratio, n_m_unique_ratio / np.sum(n_m_unique_ratio), color='blue')
+    # ax.plot(f_unique_ratio, n_f_unique_ratio / np.sum(n_f_unique_ratio), color='pink')
+
+    ######
+
 
     bin_start = 110 * 60
     bw = 12 * 60 * 60
@@ -677,29 +830,29 @@ def main():
 
 
 
-    fig, ax = plt.subplots(7, 2, facecolor='white', figsize=(20/2.54, 36/2.54), sharex=True, sharey=True)
-    ax = np.hstack(ax)
-    for fish_nr in range(len(d_transition_times)):
-        n, bins = np.histogram(day_d_transition_times[fish_nr], bins= np.arange(np.percentile(day_d_transition_times[fish_nr], 5), np.percentile(day_d_transition_times[fish_nr], 95), 1))
-        n = n / np.sum(n) / (bins[1] - bins[0])
-        bc = bins[:-1] + (bins[1] - bins[0]) / 2
-
-        fit, _ = curve_fit(efunc, bc[5:], n[5:])
-
-        ax[fish_nr].bar(bins[:-1] + (bins[1] - bins[0]) / 2, n, width = (bins[1] - bins[0]) * 0.8, color='red', alpha = 0.4)
-        ax[fish_nr].plot(bc, efunc(bc, *fit), color='red')
-
-        n, bins = np.histogram(night_d_transition_times[fish_nr], bins= np.arange(np.percentile(night_d_transition_times[fish_nr], 5), np.percentile(night_d_transition_times[fish_nr], 95), 1))
-        n = n / np.sum(n) / (bins[1] - bins[0])
-        bc = bins[:-1] + (bins[1] - bins[0]) / 2
-
-        fit, _ = curve_fit(efunc, bc[5:], n[5:])
-
-        ax[fish_nr].bar(bins[:-1] + (bins[1] - bins[0]) / 2, n, width = (bins[1] - bins[0]) * 0.8, color='blue', alpha = 0.4)
-        ax[fish_nr].plot(bc, efunc(bc, *fit), color='blue')
-        # ax[fish_nr].plot(bins[:-1] + (bins[1] - bins[0]) / 2, n, color='blue')
-        ax[fish_nr].set_yscale('log')
-        ax[fish_nr].set_xlim([1, 200])
+    # fig, ax = plt.subplots(7, 2, facecolor='white', figsize=(20/2.54, 36/2.54), sharex=True, sharey=True)
+    # ax = np.hstack(ax)
+    # for fish_nr in range(len(d_transition_times)):
+    #     n, bins = np.histogram(day_d_transition_times[fish_nr], bins= np.arange(np.percentile(day_d_transition_times[fish_nr], 5), np.percentile(day_d_transition_times[fish_nr], 95), 1))
+    #     n = n / np.sum(n) / (bins[1] - bins[0])
+    #     bc = bins[:-1] + (bins[1] - bins[0]) / 2
+    #
+    #     fit, _ = curve_fit(efunc, bc[5:], n[5:])
+    #
+    #     ax[fish_nr].bar(bins[:-1] + (bins[1] - bins[0]) / 2, n, width = (bins[1] - bins[0]) * 0.8, color='red', alpha = 0.4)
+    #     ax[fish_nr].plot(bc, efunc(bc, *fit), color='red')
+    #
+    #     n, bins = np.histogram(night_d_transition_times[fish_nr], bins= np.arange(np.percentile(night_d_transition_times[fish_nr], 5), np.percentile(night_d_transition_times[fish_nr], 95), 1))
+    #     n = n / np.sum(n) / (bins[1] - bins[0])
+    #     bc = bins[:-1] + (bins[1] - bins[0]) / 2
+    #
+    #     fit, _ = curve_fit(efunc, bc[5:], n[5:])
+    #
+    #     ax[fish_nr].bar(bins[:-1] + (bins[1] - bins[0]) / 2, n, width = (bins[1] - bins[0]) * 0.8, color='blue', alpha = 0.4)
+    #     ax[fish_nr].plot(bc, efunc(bc, *fit), color='blue')
+    #     # ax[fish_nr].plot(bins[:-1] + (bins[1] - bins[0]) / 2, n, color='blue')
+    #     ax[fish_nr].set_yscale('log')
+    #     ax[fish_nr].set_xlim([1, 200])
 
     # fig, ax = plt.subplots(1, 2, facecolor='white', figsize=(20/2.54, 12/2.54), sharex=True, sharey=True)
     # for fish_nr in range(len(d_transition_times)):
@@ -715,82 +868,82 @@ def main():
     #     ax[1].plot(bins[:-1] + (bins[1] - bins[0]) / 2, n, color=c)
 
 
-    col = colors[:7]
-    fig, ax = plt.subplots(figsize=(20/2.54, 12/2.54), facecolor='white')
-    ax.set_xlabel('day transition count')
-    ax.set_ylabel('night transition count')
-    for fish_nr in range(len(dn_hab_changes)):
-        c = colors[fish_nr % 7]
-        if fish_nr < len(col):
-            m = 'o'
-        else:
-            m = 'D'
-        # ax.plot(dn_hab_changes[fish_nr][1::2], dn_hab_changes[fish_nr][::2], 'o', color=c)
-        ax.plot(dn_hab_changes[fish_nr][1::2][(dn_hab_changes[fish_nr][1::2] != 0) & (dn_hab_changes[fish_nr][::2] != 0)],
-                dn_hab_changes[fish_nr][::2][(dn_hab_changes[fish_nr][1::2] != 0) & (dn_hab_changes[fish_nr][::2] != 0)], m, color=c, markersize=6)
-    ax.plot([0, 6000], [0, 6000], 'k-', lw=2)
-
-    ### prefered habitat sep day
-    # rel_sep_fish_counts_in_habitat[dn_idx][fish_nr][hab_idx]
-
-    fig, ax = plt.subplots(figsize=(20/2.54, 12/2.54), facecolor='white', sharex=True)
-    bp_day = ax.boxplot(fish_perc_in_pref_hab_day, positions = np.arange(len(fish_perc_in_pref_hab_day))*4, sym = '', widths=0.8)
-    bp_night = ax.boxplot(fish_perc_in_pref_hab_night, positions = np.arange(len(fish_perc_in_pref_hab_day))*4 +1, sym = '', widths=0.8, patch_artist=True)
-
-    for patch in bp_night['boxes']:
-        patch.set(facecolor='lightgrey')
-    for element in ['whiskers', 'fliers', 'means', 'medians', 'caps']:
-        plt.setp(bp_night[element], color='k')
-        plt.setp(bp_day[element], color='k')
-
-    ax.set_xticks(np.arange(14)*4 + .5)
-    ax.set_xticklabels(np.arange(14) + 1)
+    # col = colors[:7]
+    # fig, ax = plt.subplots(figsize=(20/2.54, 12/2.54), facecolor='white')
+    # ax.set_xlabel('day transition count')
+    # ax.set_ylabel('night transition count')
+    # for fish_nr in range(len(dn_hab_changes)):
+    #     c = colors[fish_nr % 7]
+    #     if fish_nr < len(col):
+    #         m = 'o'
+    #     else:
+    #         m = 'D'
+    #     # ax.plot(dn_hab_changes[fish_nr][1::2], dn_hab_changes[fish_nr][::2], 'o', color=c)
+    #     ax.plot(dn_hab_changes[fish_nr][1::2][(dn_hab_changes[fish_nr][1::2] != 0) & (dn_hab_changes[fish_nr][::2] != 0)],
+    #             dn_hab_changes[fish_nr][::2][(dn_hab_changes[fish_nr][1::2] != 0) & (dn_hab_changes[fish_nr][::2] != 0)], m, color=c, markersize=6)
+    # ax.plot([0, 6000], [0, 6000], 'k-', lw=2)
     #
-    ax.set_xlim([-1, 54])
-    ax.set_ylim([0, 1])
+    # ### prefered habitat sep day
+    # # rel_sep_fish_counts_in_habitat[dn_idx][fish_nr][hab_idx]
+    #
+    # fig, ax = plt.subplots(figsize=(20/2.54, 12/2.54), facecolor='white', sharex=True)
+    # bp_day = ax.boxplot(fish_perc_in_pref_hab_day, positions = np.arange(len(fish_perc_in_pref_hab_day))*4, sym = '', widths=0.8)
+    # bp_night = ax.boxplot(fish_perc_in_pref_hab_night, positions = np.arange(len(fish_perc_in_pref_hab_day))*4 +1, sym = '', widths=0.8, patch_artist=True)
+    #
+    # for patch in bp_night['boxes']:
+    #     patch.set(facecolor='lightgrey')
+    # for element in ['whiskers', 'fliers', 'means', 'medians', 'caps']:
+    #     plt.setp(bp_night[element], color='k')
+    #     plt.setp(bp_day[element], color='k')
+    #
+    # ax.set_xticks(np.arange(14)*4 + .5)
+    # ax.set_xticklabels(np.arange(14) + 1)
+    # #
+    # ax.set_xlim([-1, 54])
+    # ax.set_ylim([0, 1])
     # plt.show()
 
-    fig, ax = plt.subplots(2, 1, figsize=(20/2.54, 12/2.54), facecolor='white', sharex=True)
-    for fish_nr in range(len(fish_pref_hab)):
-        c = colors[fish_nr]
-        ax[0].plot(fish_dn_mask[fish_nr][fish_dn_mask[fish_nr] % 2 == 0], fish_perc_in_pref_hab[fish_nr][fish_dn_mask[fish_nr] % 2 == 0], color=c, marker = '.') # night cases
-        ax[1].plot((fish_dn_mask[fish_nr][fish_dn_mask[fish_nr] % 2 != 0]), fish_perc_in_pref_hab[fish_nr][fish_dn_mask[fish_nr] % 2 != 0], color=c, marker='.') # day cases
-    ax[1].set_xlabel('Night/Day no.')
-    ax[0].set_ylabel('occupation of\nfavourite habitat')
-    ax[1].set_ylabel('occupation of\nfavourite habitat')
-    ax[0].set_ylim([0, 1])
-    ax[1].set_ylim([0, 1])
-
-    fig, ax = plt.subplots(2, 1, figsize=(20/2.54, 12/2.54), facecolor='white', sharex=True)
-    for fish_nr in range(len(fish_pref_hab)):
-        c = colors[fish_nr]
-        ax[0].plot(fish_dn_mask[fish_nr][fish_dn_mask[fish_nr] % 2 == 0],
-                   fish_perc_in_pref_hab[fish_nr][fish_dn_mask[fish_nr] % 2 == 0] + fish_perc_in_2pref_hab[fish_nr][fish_dn_mask[fish_nr] % 2 == 0], color=c, marker = '.') # night cases
-        ax[1].plot((fish_dn_mask[fish_nr][fish_dn_mask[fish_nr] % 2 != 0]),
-                   fish_perc_in_pref_hab[fish_nr][fish_dn_mask[fish_nr] % 2 != 0] + fish_perc_in_2pref_hab[fish_nr][fish_dn_mask[fish_nr] % 2 != 0], color=c, marker='.') # day cases
-    ax[1].set_xlabel('Night/Day no.')
-    ax[0].set_ylabel('occupation of\ntwo favourite habitat')
-    ax[1].set_ylabel('occupation of\ntwo favourite habitat')
-    ax[0].set_ylim([0, 1])
-    ax[1].set_ylim([0, 1])
-
-
-
-    fig, ax = plt.subplots(2, 1, figsize=(20/2.54, 12/2.54), facecolor='white', sharex=True)
-    ax[0].plot(np.arange(14), n_pref_hab_changes_night)
-    ax[1].plot(np.arange(14), n_pref_hab_changes_day)
-    ax[1].set_xlabel('Fish ID')
-    ax[1].set_ylabel('rel. pref habitat changes')
-    ax[0].set_ylabel('rel. pref habitat changes')
-    ax[0].set_ylim([0, 1])
-    ax[1].set_ylim([0, 1])
-
-    plt.figure()
-    plt.plot(n_pref_hab_changes_day, n_pref_hab_changes_night, 'o')
-    plt.xlabel('day changes')
-    plt.ylabel('night changes')
-    plt.xlim([0, 1])
-    plt.ylim([0, 1])
+    # fig, ax = plt.subplots(2, 1, figsize=(20/2.54, 12/2.54), facecolor='white', sharex=True)
+    # for fish_nr in range(len(fish_pref_hab)):
+    #     c = colors[fish_nr]
+    #     ax[0].plot(fish_dn_mask[fish_nr][fish_dn_mask[fish_nr] % 2 == 0], fish_perc_in_pref_hab[fish_nr][fish_dn_mask[fish_nr] % 2 == 0], color=c, marker = '.') # night cases
+    #     ax[1].plot((fish_dn_mask[fish_nr][fish_dn_mask[fish_nr] % 2 != 0]), fish_perc_in_pref_hab[fish_nr][fish_dn_mask[fish_nr] % 2 != 0], color=c, marker='.') # day cases
+    # ax[1].set_xlabel('Night/Day no.')
+    # ax[0].set_ylabel('occupation of\nfavourite habitat')
+    # ax[1].set_ylabel('occupation of\nfavourite habitat')
+    # ax[0].set_ylim([0, 1])
+    # ax[1].set_ylim([0, 1])
+    #
+    # fig, ax = plt.subplots(2, 1, figsize=(20/2.54, 12/2.54), facecolor='white', sharex=True)
+    # for fish_nr in range(len(fish_pref_hab)):
+    #     c = colors[fish_nr]
+    #     ax[0].plot(fish_dn_mask[fish_nr][fish_dn_mask[fish_nr] % 2 == 0],
+    #                fish_perc_in_pref_hab[fish_nr][fish_dn_mask[fish_nr] % 2 == 0] + fish_perc_in_2pref_hab[fish_nr][fish_dn_mask[fish_nr] % 2 == 0], color=c, marker = '.') # night cases
+    #     ax[1].plot((fish_dn_mask[fish_nr][fish_dn_mask[fish_nr] % 2 != 0]),
+    #                fish_perc_in_pref_hab[fish_nr][fish_dn_mask[fish_nr] % 2 != 0] + fish_perc_in_2pref_hab[fish_nr][fish_dn_mask[fish_nr] % 2 != 0], color=c, marker='.') # day cases
+    # ax[1].set_xlabel('Night/Day no.')
+    # ax[0].set_ylabel('occupation of\ntwo favourite habitat')
+    # ax[1].set_ylabel('occupation of\ntwo favourite habitat')
+    # ax[0].set_ylim([0, 1])
+    # ax[1].set_ylim([0, 1])
+    #
+    #
+    #
+    # fig, ax = plt.subplots(2, 1, figsize=(20/2.54, 12/2.54), facecolor='white', sharex=True)
+    # ax[0].plot(np.arange(14), n_pref_hab_changes_night)
+    # ax[1].plot(np.arange(14), n_pref_hab_changes_day)
+    # ax[1].set_xlabel('Fish ID')
+    # ax[1].set_ylabel('rel. pref habitat changes')
+    # ax[0].set_ylabel('rel. pref habitat changes')
+    # ax[0].set_ylim([0, 1])
+    # ax[1].set_ylim([0, 1])
+    #
+    # plt.figure()
+    # plt.plot(n_pref_hab_changes_day, n_pref_hab_changes_night, 'o')
+    # plt.xlabel('day changes')
+    # plt.ylabel('night changes')
+    # plt.xlim([0, 1])
+    # plt.ylim([0, 1])
 
     # plt.show()
 
@@ -806,21 +959,9 @@ def main():
     f_mask = np.argsort(n_pref_hab_changes_day[6:])
 
     #### FIGURE 1 #########################################################################################
-    # fig = plt.figure(facecolor='white', figsize=(20/2.54, 36/2.54))
-    # fig = plt.figure(facecolor='white', figsize=(18/2.54, 18/2.54))
     fig = plt.figure(facecolor='white', figsize=(18/2.54, 12/2.54))
     fs = 10
 
-    # labels = fs
-    # letters = fs +6
-    # day night text = fs
-    # legend = fs - 2
-    # tick params = fs - 1
-
-    # ax0 = fig.add_axes([0.1, 16/21, .85, 4/21])
-    # ax0 = fig.add_axes([2/18., (1.25 + 13.5/4 + .75 + 13.5/8 + 13.5/8 + 1.5 + 13.5/8 + 13.5/8 + 0.75)/18, 15/18, (13.5/4) / 18])
-
-    # ax0 = fig.add_axes([2.5/18, 14.5/18, 14/18, 3/18])
     ax0 = fig.add_axes([2.5/18, 6/10, 12.5/18, 3.5/10])
 
     fig.text(.75/18, 9.5/10, 'A', ha='center', va='center', fontsize=fs+6)
@@ -1207,20 +1348,6 @@ def main():
 
     ax2_0.set_xlim([-0.5, 13.5])
     ax2_1.set_xlim([-0.5, 13.5])
-    # ax3.set_xlim([-0.5, 13.5])
-
-    # ax3_0.set_ylim([0, 15000])
-    # ax3_1.set_ylim([0, 1])
-    # ax3_0.set_ylim([0, 1])
-    # ax3_1.set_ylim([0, 1])
-    # ax3_0.set_xticks(np.arange(14))
-    # ax3_0.set_xticklabels(['', '', '', '', '', '', '', '', '', '', '', '', '', ''])
-    # ax3_1.set_xticks(np.arange(14))
-    # ax2_1.set_xticklabels(np.arange(14)+1)
-    # ax3_1.set_xticklabels(['', '', '', '', '', '', '', '', '', '', '', '', '', ''])
-    # ax2_1.set_xticks(np.arange(14))
-    # ax2_1.set_xticklabels(np.arange(14)+1)
-    # ax2_1.set_xlabel('Fish ID', fontsize=10)
 
     for ax in [ax2_0, ax2_1, ax3]:
         ax.tick_params(labelsize=fs-1)
@@ -1230,38 +1357,25 @@ def main():
 
     ### FIGURE 3 ##########################################################################################
 
-    # fig = plt.figure(facecolor='white', figsize=(20/2.54, 36/2.54))
-
-    # fig = plt.figure(facecolor='white', figsize=(18/2.54, 18/2.54))
     fig = plt.figure(facecolor='white', figsize=(18/2.54, 12/2.54))
 
     fs = 10
 
-    # labels = fs
-    # letters = fs +6
-    # day night text = fs
-    # legend = fs - 2
-    # tick params = fs - 1
-
-    # fig.text(1.5/18, 16/18, 'EOD frequency\n[kHz]', ha='center', va='center', fontsize=fs, rotation =90)
-    # fig.text(.75 / 18, 17.5 / 18, 'A', ha='center', va='center', fontsize=fs + 6) --> on y hight
-
-    ################################
-    # ax0_0 = fig.add_axes([0.1, .8 / 3 * 2 + 3 * 0.05 + .8 / 3 * 0.525, .85, .8 / 3 * 0.45])
-
-    # ax0_0 = fig.add_axes([2.75/18, 15.75/18, 14/18, 1.75/18])
     ax0_0 = fig.add_axes([2.75/18, 8/10, 14/18, 1.5/10])
     ax0_1 = fig.add_axes([2.75/18, 6/10, 14/18, 1.5/10])
 
-    # ax0_0.errorbar(np.arange(len(mdhc))[:6], mdhc[:6][m_mask], yerr=sdhc[:6][m_mask], color='cornflowerblue', lw=2, elinewidth = 1.5)
-    ax0_1.errorbar(np.arange(len(mdhc))[:6], mdhc[:6], yerr=sdhc[:6], color='cornflowerblue', lw=2, elinewidth = 1.5, label='day')
-    # ax0_0.errorbar(np.arange(len(mdhc))[6:], mdhc[6:][f_mask], yerr=sdhc[6:][f_mask], color='cornflowerblue', lw=2, elinewidth = 1.5)
-    ax0_1.errorbar(np.arange(len(mdhc))[6:], mdhc[6:], yerr=sdhc[6:], color='cornflowerblue', lw=2, elinewidth = 1.5)
+    # ax0_1.errorbar(np.arange(len(mdhc))[:6], mdhc[:6], yerr=sdhc[:6], color='cornflowerblue', lw=2, elinewidth = 1.5, label='day')
+    ax0_1.bar(np.arange(len(mdhc))[:6]-.125, mdhc[:6], yerr=sdhc[:6], color='cornflowerblue', width=.25, label='day')
 
-    ax0_1.errorbar(np.arange(len(mnhc))[:6], mnhc[:6], yerr=snhc[:6], color='#888888', lw=2, elinewidth = 1.5, label='night')
-    # ax0_0.errorbar(np.arange(len(mnhc))[:6], mnhc[:6][m_mask], yerr=snhc[:6][m_mask], color='#888888', lw=2, elinewidth = 1.5)
-    ax0_1.errorbar(np.arange(len(mnhc))[6:], mnhc[6:], yerr=snhc[6:], color='#888888', lw=2, elinewidth = 1.5)
-    # ax0_0.errorbar(np.arange(len(mnhc))[6:], mnhc[6:][f_mask], yerr=snhc[6:][f_mask], color='#888888', lw=2, elinewidth = 1.5)
+    # ax0_1.errorbar(np.arange(len(mdhc))[6:], mdhc[6:], yerr=sdhc[6:], color='cornflowerblue', lw=2, elinewidth = 1.5)
+    ax0_1.bar(np.arange(len(mdhc))[6:]-.125, mdhc[6:], yerr=sdhc[6:], color='cornflowerblue', width =.25)
+
+    # ax0_1.errorbar(np.arange(len(mnhc))[:6], mnhc[:6], yerr=snhc[:6], color='#888888', lw=2, elinewidth = 1.5, label='night')
+    ax0_1.bar(np.arange(len(mnhc))[:6]+.125, mnhc[:6], yerr=snhc[:6], color='#888888', width=.25, label='night')
+
+    # ax0_1.errorbar(np.arange(len(mnhc))[6:], mnhc[6:], yerr=snhc[6:], color='#888888', lw=2, elinewidth = 1.5)
+    ax0_1.bar(np.arange(len(mnhc))[6:]+.125, mnhc[6:], yerr=snhc[6:], color='#888888', width=.25)
+
     ax0_1.set_xticks([])
     ax0_1.set_yticks([0, 5000, 10000, 15000])
     ax0_1.set_yticklabels(['0', '5', '10', '15'])
@@ -1374,20 +1488,23 @@ def main():
     # ax0_1 = fig.add_axes([2.75/18, 13.5/18, 14/18, 1.75/18])
 
 
-    # ax0_1.plot(np.arange(14)[:6], n_pref_hab_changes_day[:6][m_mask], color='cornflowerblue', lw = 2)
-    ax0_0.plot(np.arange(14)[:6], n_pref_hab_changes_day[:6], color='cornflowerblue', lw = 2)
-    # ax0_1.plot(np.arange(14)[6:], n_pref_hab_changes_day[6:][f_mask], color='cornflowerblue', lw = 2)
-    ax0_0.plot(np.arange(14)[6:], n_pref_hab_changes_day[6:], color='cornflowerblue', lw = 2)
 
-    ax0_0.plot(np.arange(14)[:6], n_pref_hab_changes_night[:6], color='#888888', lw = 2)
-    # ax0_1.plot(np.arange(14)[:6], n_pref_hab_changes_night[:6][m_mask], color='#888888', lw = 2)
-    ax0_0.plot(np.arange(14)[6:], n_pref_hab_changes_night[6:], color='#888888', lw = 2)
-    # ax0_1.plot(np.arange(14)[6:], n_pref_hab_changes_night[6:][f_mask], color='#888888', lw = 2)
+    # ax0_0.plot(np.arange(14)[:6], n_pref_hab_changes_day[:6], color='cornflowerblue', lw = 2)
+    ax0_0.bar(np.arange(14)[:6]-.125, n_pref_hab_changes_day[:6], color='cornflowerblue', width=.25)
 
-    ax0_0.fill_between([-.25, 5.25], [1, 1], [1.2, 1.2], color='firebrick', clip_on=False, alpha=0.8)
-    ax0_0.text(2.5, 1.1, 'male', fontsize=fs-2, color='k', va='center', ha='center', clip_on=False)
-    ax0_0.fill_between([5.75, 13.25], [1, 1], [1.2, 1.2], color=colors[2], clip_on=False, alpha=0.8)
-    ax0_0.text(9.5, 1.1, 'female', fontsize=fs-2, color='k', va='center', ha='center', clip_on=False)
+    # ax0_0.plot(np.arange(14)[6:], n_pref_hab_changes_day[6:], color='cornflowerblue', lw = 2)
+    ax0_0.bar(np.arange(14)[6:]-.125, n_pref_hab_changes_day[6:], color='cornflowerblue', width=.25)
+
+    # ax0_0.plot(np.arange(14)[:6], n_pref_hab_changes_night[:6], color='#888888', lw = 2)
+    ax0_0.bar(np.arange(14)[:6]+.125, n_pref_hab_changes_night[:6], color='#888888', width=.25)
+
+    # ax0_0.plot(np.arange(14)[6:], n_pref_hab_changes_night[6:], color='#888888', lw = 2)
+    ax0_0.bar(np.arange(14)[6:]+.125, n_pref_hab_changes_night[6:], color='#888888', width=.25)
+
+    ax0_0.fill_between([-.25, 5.25], [1.05, 1.05], [1.25, 1.25], color='firebrick', clip_on=False, alpha=0.8)
+    ax0_0.text(2.5, 1.15, 'male', fontsize=fs-2, color='k', va='center', ha='center', clip_on=False)
+    ax0_0.fill_between([5.75, 13.25], [1.05, 1.05], [1.25, 1.25], color=colors[2], clip_on=False, alpha=0.8)
+    ax0_0.text(9.5, 1.15, 'female', fontsize=fs-2, color='k', va='center', ha='center', clip_on=False)
 
     for i in range(len(colors)):
         sh = .35
