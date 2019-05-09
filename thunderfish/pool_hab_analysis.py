@@ -496,7 +496,8 @@ def main():
         mdhc.append(np.mean(d_hab_changes[fish_nr]))
         sdhc.append(np.std(d_hab_changes[fish_nr]))
 
-
+    # embed()
+    # quit()
     # REVIEW ADAPTATIONS # 1
     n_mask = np.full(len(times), False)
     for ns, ne in zip(dn_borders[::2], dn_borders[1::2]):
@@ -631,6 +632,16 @@ def main():
 
 
     ### fish ID group size ###
+    i_of_plus_fish = [0]
+    i_of_plus_fish.append(np.arange(len(hab_fish_count[0]))[np.sum(hab_fish_count, axis=0) > 4][0])
+    i_of_plus_fish.append(np.arange(len(hab_fish_count[0]))[np.sum(hab_fish_count, axis=0) > 6][0])
+    i_of_plus_fish.append(np.arange(len(hab_fish_count[0]))[np.sum(hab_fish_count, axis=0) > 8][0])
+    i_of_plus_fish.append(np.arange(len(hab_fish_count[0]))[np.sum(hab_fish_count, axis=0) > 10][0])
+    i_of_plus_fish.append(np.arange(len(hab_fish_count[0]))[np.sum(hab_fish_count, axis=0) > 12][0])
+    i_of_plus_fish.append(len(hab_fish_count[0]))
+
+    count_m = [4, 4, 4, 6, 6, 6]
+    count_f = [0, 2, 4, 4, 6, 8]
 
     group_size_per_id_night = []
     group_size_per_id_day = []
@@ -714,36 +725,79 @@ def main():
     plt.tight_layout()
 
 
-    i_of_plus_fish = [0]
-    i_of_plus_fish.append(np.arange(len(hab_fish_count[0]))[np.sum(hab_fish_count, axis=0) >= 6][0])
-    i_of_plus_fish.append(np.arange(len(hab_fish_count[0]))[np.sum(hab_fish_count, axis=0) >= 8][0])
-    i_of_plus_fish.append(np.arange(len(hab_fish_count[0]))[np.sum(hab_fish_count, axis=0) >= 10][0])
-    i_of_plus_fish.append(np.arange(len(hab_fish_count[0]))[np.sum(hab_fish_count, axis=0) >= 12][0])
-    i_of_plus_fish.append(np.arange(len(hab_fish_count[0]))[np.sum(hab_fish_count, axis=0) >= 14][0])
-    i_of_plus_fish.append(len(hab_fish_count[0]))
-
 
     ratio_day = []
     ratio_night = []
     # ToDo: continue here !!!
-    for hab_id in range(5):
-        ratio_day.append(hab_male_count[hab_id][~n_mask] / (hab_male_count[hab_id][~n_mask] + hab_female_count[hab_id][~n_mask]))
-        ratio_night.append(hab_male_count[hab_id][n_mask] / (hab_male_count[hab_id][n_mask] + hab_female_count[hab_id][n_mask]))
+    for i0, i1 in zip(i_of_plus_fish[:-1], i_of_plus_fish[1:]):
+        fish_count_mask = np.arange(i0, i1)
+        ratio_day.append([])
+        ratio_night.append([])
+        for hab_id in range(5):
+            ratio_day[-1].append(hab_male_count[hab_id][fish_count_mask][~n_mask[fish_count_mask]] / (
+                    hab_male_count[hab_id][fish_count_mask][~n_mask[fish_count_mask]] + hab_female_count[hab_id][fish_count_mask][~n_mask[fish_count_mask]]))
 
-        ratio_day[-1] = ratio_day[-1][~np.isnan(ratio_day[-1])]
-        ratio_night[-1] = ratio_night[-1][~np.isnan(ratio_night[-1])]
+            ratio_night[-1].append(hab_male_count[hab_id][fish_count_mask][n_mask[fish_count_mask]] / (
+                    hab_male_count[hab_id][fish_count_mask][n_mask[fish_count_mask]] + hab_female_count[hab_id][fish_count_mask][n_mask[fish_count_mask]]))
 
-    fig, ax = plt.subplots(figsize=(20/2.54, 12/2.54), facecolor='white')
+            ratio_day[-1][-1] = ratio_day[-1][-1][~np.isnan(ratio_day[-1][-1])]
+            ratio_night[-1][-1] = ratio_night[-1][-1][~np.isnan(ratio_night[-1][-1])]
 
-    ax.errorbar(np.arange(len(ratio_day)) + 1 - 0.1, list(map(lambda x: np.mean(x), ratio_day)), yerr=list(map(lambda x: np.std(x), ratio_day)), fmt='none', ecolor='grey')
-    ax.plot(np.arange(len(ratio_day)) + 1 - 0.1, list(map(lambda x: np.mean(x), ratio_day)), 'o', color='grey')
+    fig, ax = plt.subplots(2, 3, figsize=(20/2.54, 12/2.54), facecolor='white')
+    ax = np.hstack(ax)
 
-    ax.errorbar(np.arange(len(ratio_night)) + 1 + 0.1, list(map(lambda x: np.mean(x), ratio_night)), yerr=list(map(lambda x: np.std(x), ratio_night)), fmt='none', ecolor='k')
-    ax.plot(np.arange(len(ratio_night)) + 1 + 0.1, list(map(lambda x: np.mean(x), ratio_night)), 'o', color='k')
+    for i in np.arange(len(ratio_day)-1)+1:
+        Cratio = count_m[i] / (count_m[i] + count_f[i])
+        ax[i].plot([0.5, 5.5], [0, 0], '--', lw=1, color='k')
+        ax[i].errorbar(np.arange(len(ratio_day[i])) + 1 - 0.1, np.array(list(map(lambda x: np.mean(x), ratio_day[i]))) - Cratio, yerr=list(map(lambda x: np.std(x), ratio_day[i])), fmt='none', ecolor='grey')
+        ax[i].plot(np.arange(len(ratio_day[i])) + 1 - 0.1, np.array(list(map(lambda x: np.mean(x), ratio_day[i]))) - Cratio, 'o', color='grey')
 
-    ax.set_xticks(np.arange(5) + 1)
-    ax.set_xticklabels(['stacked\nstones', 'isolated\nstones', 'grass', 'gravel', 'open water'], rotation = 70)
-    ax.set_ylabel('male ratio')
+        ax[i].errorbar(np.arange(len(ratio_night[i])) + 1 + 0.1, np.array(list(map(lambda x: np.mean(x), ratio_night[i]))) - Cratio, yerr=list(map(lambda x: np.std(x), ratio_night[i])), fmt='none', ecolor='k')
+        ax[i].plot(np.arange(len(ratio_night[i])) + 1 + 0.1, np.array(list(map(lambda x: np.mean(x), ratio_night[i]))) - Cratio, 'o', color='k')
+        ax[i].set_ylim(-.5, .5)
+        ax[i].set_xlim(0.5, 5.5)
+
+        ax[i].text(1, -.425, u'\u2642:%.0f\n\u2640:%.0f' % (count_m[i], count_f[i]), fontsize=8, va='center', ha='center')
+
+        ax[i].set_xticks(np.arange(5) + 1)
+        ax[i].set_xticklabels([])
+
+    glob_mean_day = []
+    glob_mean_night = []
+    glob_std_day = []
+    glob_std_night = []
+    for hab_nr in range(np.shape(ratio_day)[1]):
+        collect_day = []
+        collect_night = []
+        for i in np.arange(len(ratio_day)-1)+1:
+            collect_day.extend(ratio_day[i][hab_nr] - count_m[i] / (count_m[i] + count_f[i]))
+            collect_night.extend(ratio_night[i][hab_nr] - count_m[i] / (count_m[i] + count_f[i]))
+        # embed()
+        # quit()
+        glob_mean_day.append(np.mean(collect_day))
+        glob_mean_night.append(np.mean(collect_night))
+        glob_std_day.append(np.std(collect_day))
+        glob_std_night.append(np.std(collect_night))
+
+    ax[0].plot([0.5, 5.5], [0, 0], '--', lw = 1, color='k')
+    ax[0].errorbar(np.arange(len(ratio_day[i])) + 1 - 0.1, glob_mean_day, yerr=glob_std_day, fmt='none', ecolor='grey')
+    ax[0].plot(np.arange(len(ratio_day[i])) + 1 - 0.1, glob_mean_day, 'o', color='grey')
+
+    ax[0].errorbar(np.arange(len(ratio_night[i])) + 1 + 0.1, glob_mean_night, yerr=glob_std_night, fmt='none', ecolor='k')
+    ax[0].plot(np.arange(len(ratio_night[i])) + 1 + 0.1, glob_mean_night, 'o', color='k')
+    ax[0].set_ylim(-0.5, 0.5)
+    ax[0].set_xlim(0.5, 5.5)
+
+    ax[0].text(1, -0.425, 'all', fontsize=8, va='center', ha='center')
+    ax[0].set_xticks(np.arange(5) + 1)
+    ax[0].set_xticklabels([])
+
+    # ax[-2].set_xticks(np.arange(5) + 1)
+    ax[0].set_ylabel('above expexted\nmale ratio')
+    ax[3].set_ylabel('above expexted\nmale ratio')
+    ax[-1].set_xticklabels(['st. stones', 'iso. stones', 'grass', 'gravel', 'water'], rotation = 70)
+    ax[-2].set_xticklabels(['st. stones', 'iso. stones', 'grass', 'gravel', 'water'], rotation = 70)
+    ax[-3].set_xticklabels(['st. stones', 'iso. stones', 'grass', 'gravel', 'water'], rotation = 70)
     plt.tight_layout()
 
     # ax.boxplot(ratio_day, positions = np.arange(len(ratio_day)) + 1 - 0.1, widths = 0.2)
