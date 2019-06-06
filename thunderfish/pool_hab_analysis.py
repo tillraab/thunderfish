@@ -8,8 +8,8 @@ import scipy.stats as scp
 from scipy.optimize import curve_fit
 from tqdm import tqdm
 
-def efunc(x, a, tau):
-    return a*np.exp(-x/tau)
+def efunc(x, tau):
+    return np.exp(-x/tau) / tau
 
 def loaddata(datafile):
     print('loading datafile: %s' % datafile)
@@ -508,35 +508,39 @@ def main():
     # quit()
     # REVIEW ADAPTATIONS # 1
     ##############################################
+    # MALEFEMALE
+
     hab_fish_count = []
     hab_male_count = []
     hab_female_count = []
 
-    fish_in_group_size = np.full(np.shape(fish_hab), np.nan) # wir n other fish (m and f)
-    male_with_n_male = np.full((6, np.shape(fish_hab)[1]), np.nan) # with n other male
-    male_with_n_female = np.full((6, np.shape(fish_hab)[1]), np.nan) # with n other male
+    sco = 6
 
-    female_with_n_female = np.full((8, np.shape(fish_hab)[1]), np.nan) # with n other female
-    female_with_n_male = np.full((8, np.shape(fish_hab)[1]), np.nan) # with n other female
+    fish_in_group_size = np.full(np.shape(fish_hab), np.nan) # wir n other fish (m and f)
+    male_with_n_male = np.full((sco, np.shape(fish_hab)[1]), np.nan) # with n other male
+    male_with_n_female = np.full((sco, np.shape(fish_hab)[1]), np.nan) # with n other male
+
+    female_with_n_female = np.full((14-sco, np.shape(fish_hab)[1]), np.nan) # with n other female
+    female_with_n_male = np.full((14-sco, np.shape(fish_hab)[1]), np.nan) # with n other female
 
     for hab in range(5):
         hab_fish_count.append(np.sum(np.array(fish_hab) == hab, axis= 0))
         help = np.sum(np.array(fish_hab) == hab, axis= 0)[np.where(fish_hab == hab)[1]]
         fish_in_group_size[np.where(fish_hab == hab)] = help
 
-        hab_male_count.append(np.sum(np.array(fish_hab[:6]) == hab, axis= 0))
-        help = np.sum(np.array(fish_hab)[:6] == hab, axis= 0)[np.where(fish_hab[:6] == hab)[1]]
-        male_with_n_male[np.where(fish_hab[:6] == hab)] = help
+        hab_male_count.append(np.sum(np.array(fish_hab[:sco]) == hab, axis= 0))
+        help = np.sum(np.array(fish_hab)[:sco] == hab, axis= 0)[np.where(fish_hab[:sco] == hab)[1]]
+        male_with_n_male[np.where(fish_hab[:sco] == hab)] = help
 
-        help = np.sum(np.array(fish_hab)[:6] == hab, axis= 0)[np.where(fish_hab[6:] == hab)[1]]
-        female_with_n_male[np.where(fish_hab[6:] == hab)] = help
+        help = np.sum(np.array(fish_hab)[:sco] == hab, axis= 0)[np.where(fish_hab[sco:] == hab)[1]]
+        female_with_n_male[np.where(fish_hab[sco:] == hab)] = help
 
-        hab_female_count.append(np.sum(np.array(fish_hab[6:]) == hab, axis= 0))
-        help = np.sum(np.array(fish_hab)[6:] == hab, axis= 0)[np.where(fish_hab[6:] == hab)[1]]
-        female_with_n_female[np.where(fish_hab[6:] == hab)] = help
+        hab_female_count.append(np.sum(np.array(fish_hab[sco:]) == hab, axis= 0))
+        help = np.sum(np.array(fish_hab)[sco:] == hab, axis= 0)[np.where(fish_hab[sco:] == hab)[1]]
+        female_with_n_female[np.where(fish_hab[sco:] == hab)] = help
 
-        help = np.sum(np.array(fish_hab)[6:] == hab, axis= 0)[np.where(fish_hab[:6] == hab)[1]]
-        male_with_n_female[np.where(fish_hab[:6] == hab)] = help
+        help = np.sum(np.array(fish_hab)[sco:] == hab, axis= 0)[np.where(fish_hab[:sco] == hab)[1]]
+        male_with_n_female[np.where(fish_hab[:sco] == hab)] = help
 
 
     i_of_plus_fish = [0]
@@ -721,9 +725,9 @@ def main():
     d_female_grouping = np.array(d_female_grouping)
     n_female_grouping = np.array(n_female_grouping)
 
-    n = np.arange(len(fish_hab))+1
 
     #######################
+    n = np.arange(len(fish_hab))+1
     male_in_groupsize = []
     female_in_groupsize = []
 
@@ -1295,10 +1299,12 @@ def main():
     #### FIGURE 1 #########################################################################################
     fig = plt.figure(facecolor='white', figsize=(18/2.54, 12/2.54))
     fs = 10
+    import matplotlib.image as implt
+
 
     ax0 = fig.add_axes([2.5/18, 6/10, 12.5/18, 3.5/10])
 
-    fig.text(.75/18, 9.5/10, 'A', ha='center', va='center', fontsize=fs+6)
+    fig.text(.75/18, 9.5/10, 'C', ha='center', va='center', fontsize=fs+6)
 
     fig.text(1.375/18, 7.75/10, 'EOD frequency [Hz]', ha='center', va='center', fontsize=fs, rotation =90)
 
@@ -1312,7 +1318,7 @@ def main():
     ax0.set_ylim([650, 970])
 
     ax0a = fig.add_axes([16/18, 6/10, .5/18, 3.5/10])
-    fig.text(15.5 / 18, 9.5 / 10, 'B', ha='center', va='center', fontsize=fs + 6)
+    fig.text(15.5 / 18, 9.5 /10, 'D', ha='center', va='center', fontsize=fs + 6)
 
     ax0a.set_ylim([650, 970])
     ax0a.set_xlim([0, 2])
@@ -1323,28 +1329,16 @@ def main():
     ax0a.text(1, 700, 'female', fontsize=fs-2, color='k', va='center', ha='center', clip_on=False, rotation=90)
 
 
-
-    # ax0a.set_yticks([])
-    # ax0a.set_xticks([])
     ax0a.axis('off')
-    # ax0.set_yticklabels(['.7', '.8', '.9'])
 
-    # ax1_0 = fig.add_axes([0.1, 27/42, .85, 2/21])
-    # ax1_0 = fig.add_axes([2/18., (1.25 + 13.5/4 + .75 + 13.5/8 + 13.5/8 + 1.5 + 13.5/8)/18, 15/18, (13.5/8) / 18])
-
-    # ax1_0 = fig.add_axes([2.5/18, 12/18, 14/18, 1.5/18])
     ax1_0 = fig.add_axes([2.5/18, 3.25/10, 12.5/18, 1.75/10])
     ax1_0a = fig.add_axes([16/18, 3.25/10, .5/18, 1.75/10])
-    fig.text(15.5 / 18, 5 / 10, 'D', ha='center', va='center', fontsize=fs + 6)
-    fig.text(.75 / 18, 5 / 10, 'C', ha='center', va='center', fontsize=fs + 6)
+    fig.text(15.5 / 18, 5 /10, 'F', ha='center', va='center', fontsize=fs + 6)
+    fig.text(.75 / 18, 5 /10, 'E', ha='center', va='center', fontsize=fs + 6)
 
     fig.text(1.375/18, 3.25/10, 'fraction of fish in habitat', ha='center', va='center', fontsize=fs, rotation =90)
-    # fig.text(.025, .6, 'habitat occupation likelihood', ha='center', va='center', fontsize=10, rotation =90)
-
-    # ax1_1 = fig.add_axes([0.1, 23/42, .85, 2/21])
-    # ax1_1 = fig.add_axes([2/18., (1.25 + 13.5/4 + .75 + 13.5/8 + 13.5/8 + 1.5)/18, 15/18, (13.5/8) / 18])
     ax1_1 = fig.add_axes([2.5/18, 1.5/10, 12.5/18, 1.75/10])
-    ax1_1a = fig.add_axes([16 / 18, 1.5 / 10, .5 / 18, 1.75 / 10])
+    ax1_1a = fig.add_axes([16 / 18, 1.5 /10, .5 / 18, 1.75 /10])
 
     fishcount_night = np.round(np.nansum(np.array(binned_hab_fish_count)[:, bin_t_night_mask], axis = 0))
     fishcount_night[fishcount_night % 2 != 0] += 1
@@ -1512,7 +1506,7 @@ def main():
 
     ##########################################
     # figure 2 new !!!
-    fig = plt.figure(facecolor='white', figsize=(18/2.54, 12/2.54))
+    fig = plt.figure(facecolor='white', figsize=(18/2.54, 17/2.54))
 
 
     # Only show ticks on the left and bottom spines
@@ -1523,17 +1517,17 @@ def main():
     # ax2_0 = fig.add_axes([2/18., (1.25 + 13.5/4 + .75 + 13.5/8)/18, 15/18, (13.5/8) / 18])
 
     # ax2_0 = fig.add_axes([2.5/18, 7/18, 14/18, 1.5/18])
-    ax2_0 = fig.add_axes([2.5/18, 7.75/10, 14/18, 1.75/10])
+    ax2_0 = fig.add_axes([2.5/18, (8.75 + 5)/17, 14/18, 1.75/17])
 
-    fig.text(.75 / 18, 9.5 / 10, 'A', ha='center', va='center', fontsize=fs + 6)
+    fig.text(.75 / 18, (10.5 + 5) / 17, 'A', ha='center', va='center', fontsize=fs + 6)
 
-    fig.text(1.375/18, 7.75/10, 'rel. time in habitat', ha='center', va='center', fontsize=fs, rotation=90)
+    fig.text(1.375/18, (8.75 + 5)/17, 'rel. time in habitat', ha='center', va='center', fontsize=fs, rotation=90)
 
     # ax2_1 = fig.add_axes([0.1, 6 / 21, .85, 2 / 21])
     # ax2_1 = fig.add_axes([2/18., (1.25 + 13.5/4 + .75)/18, 15/18, (13.5/8) / 18])
 
     # ax2_1 = fig.add_axes([2.5/18, 5.5/18, 14/18, 1.5/18])
-    ax2_1 = fig.add_axes([2.5/18, 6/10, 14/18, 1.75/10])
+    ax2_1 = fig.add_axes([2.5/18, (7 + 5)/17, 14/18, 1.75/17])
 
     ax2_1.fill_between([-1, 14], [0, 0], [1, 1], color='#888888')
 
@@ -1580,10 +1574,10 @@ def main():
     # ax3 = fig.add_axes([2/18., 1.25/18, 15/18, (13.5/4) / 18])
 
     # ax3 = fig.add_axes([2.5/18, 1.5/18, 14/18, 3/18])
-    ax3 = fig.add_axes([2.5/18, 1.5/10, 14/18, 3.5/10])
+    ax3 = fig.add_axes([2.5/18, (2.5 + 5)/17, 14/18, 3.5/17])
 
-    fig.text(.75 / 18, 5 / 10, 'B', ha='center', va='center', fontsize=fs + 6)
-    fig.text(1.375/18, 3./10, 'rel. time in\npreferred habitat', ha='center', va='center', fontsize=fs, rotation=90 )
+    fig.text(.75 / 18, (6+5) / 17, 'B', ha='center', va='center', fontsize=fs + 6)
+    fig.text(1.375/18, (4.+5)/17, 'rel. time in\npreferred habitat', ha='center', va='center', fontsize=fs, rotation=90 )
 
     # bp_day = ax3.boxplot(np.array(fish_perc_in_pref_hab_day)[np.hstack([m_mask, f_mask+6])], positions = np.arange(len(fish_perc_in_pref_hab_day))*4, sym = '', widths=0.7, patch_artist=True)
     bp_day = ax3.boxplot(np.array(fish_perc_in_pref_hab_day), positions = np.arange(len(fish_perc_in_pref_hab_day))*4, sym = '', widths=0.7, patch_artist=True)
@@ -1683,7 +1677,114 @@ def main():
     ax2_0.set_xlim([-0.5, 13.5])
     ax2_1.set_xlim([-0.5, 13.5])
 
-    for ax in [ax2_0, ax2_1, ax3]:
+    ax4_1 = fig.add_axes([2.5/18, 2.5/17, 6 / 18, 3.5/17])
+    fig.text(.75 / 18, 6 / 17, 'C', ha='center', va='center', fontsize=fs + 6)
+    ax4_0 = fig.add_axes([10.5/18, 2.5/17, 6 / 18, 3.5/17])
+    fig.text(9.25 / 18, 6 / 17, 'D', ha='center', va='center', fontsize=fs + 6)
+
+    Cratio = count_m[-1] / (count_m[-1] + count_f[-1])
+    ax4_0.errorbar(np.arange(5) - 0.1, np.array(list(map(lambda x: np.mean(x), np.array(ratio_day)[-1, :]))),
+                    yerr=list(map(lambda x: np.std(x), np.array(ratio_day)[-1, :])), fmt='none', ecolor='k')
+    # rax[0].plot(np.arange(5) - 0.1, np.array(list(map(lambda x: np.mean(x), np.array(ratio_day)[-1, :]))), 'o', color='grey')
+    ax4_0.bar(np.arange(5) - 0.1, np.array(list(map(lambda x: np.mean(x), np.array(ratio_day)[-1, :]))), width=.2, color='cornflowerblue')
+
+    ax4_0.errorbar(np.arange(5) + 0.1, np.array(list(map(lambda x: np.mean(x), np.array(ratio_night)[-1, :]))),
+                    yerr=list(map(lambda x: np.std(x), np.array(ratio_night)[-1, :])), fmt='none', ecolor='k')
+    # rax[0].plot(np.arange(5) + 0.1, np.array(list(map(lambda x: np.mean(x), np.array(ratio_night)[-1, :]))), 'o', color='k')
+    ax4_0.bar(np.arange(5) + 0.1, np.array(list(map(lambda x: np.mean(x), np.array(ratio_night)[-1, :]))), width=.2, color='#888888')
+    ax4_0.set_ylim(0, 1)
+    ax4_0.set_xlim(-0.5, 4.5)
+
+    # ax4_0.text(0, .075, u'\u2642:%.0f\n\u2640:%.0f' % (count_m[-1], count_f[-1]), fontsize=10, va='center', ha='center')
+
+    ax4_0.set_xticks(np.arange(5))
+    ax4_0.set_xticklabels(['st. stones', 'iso. stones', 'grass', 'gravel', 'water'], rotation = 45)
+    ax4_0.tick_params(labelsize=9)
+    ax4_0.set_ylabel('male ratio', fontsize=10)
+    ax4_0.plot([-0.5, 4.5], [Cratio, Cratio], '--', lw=1, color='k')
+    # ax4_0.legend(loc=1, fontsize=9, frameon=False)
+
+    do_stats = False
+    if do_stats == True:
+        print('\n Mann-Whitney U male ratio day-night')
+        for i, hab in zip(range(5), ['st. stones', 'iso. stones', 'plants', 'gravel', 'open water']):
+            stats, p = scp.mannwhitneyu(np.array(ratio_day)[-1, i], np.array(ratio_night)[-1, i])
+            d = cohans_d(np.array(ratio_day)[-1, i], np.array(ratio_night)[-1, i])
+            print('%s: U = %.0f, p = %.3f, d = %.2f' % (hab, stats, p, d))
+        print('\n Mann-Whitney U male ratio between habitats')
+        for i, hab in zip(np.arange(5), np.array(['st. stones', 'iso. stones', 'plants', 'gravel', 'open water'])):
+            mean = np.mean(np.hstack([np.array(ratio_day)[-1, i], np.array(ratio_night)[-1, i]]))
+            std = np.std(np.hstack([np.array(ratio_day)[-1, i], np.array(ratio_night)[-1, i]]))
+            print('%s: %.2f+-%.2f' % (hab, mean, std))
+
+            for j, hab2 in zip(np.arange(5)[i+1:], np.array(['st. stones', 'iso. stones', 'plants', 'gravel', 'open water'])[i+1:]):
+                stats , p = scp.mannwhitneyu(np.hstack([np.array(ratio_day)[-1, i], np.array(ratio_night)[-1, i]]),
+                                             np.hstack([np.array(ratio_day)[-1, j], np.array(ratio_night)[-1, j]]))
+                d = cohans_d(np.hstack([np.array(ratio_day)[-1, i], np.array(ratio_night)[-1, i]]),
+                             np.hstack([np.array(ratio_day)[-1, j], np.array(ratio_night)[-1, j]]))
+
+                print('%s - %s: U = %.0f, p = %.3f, d = %.2f' % (hab, hab2, stats, p, d))
+
+        print("Cohan's d agains expected mean (6/14)")
+        expected = 6/14
+        for i, hab in zip(np.arange(5), np.array(['st. stones', 'iso. stones', 'plants', 'gravel', 'open water'])):
+            mean = np.mean(np.hstack([np.array(ratio_day)[-1, i], np.array(ratio_night)[-1, i]]))
+            std = np.std(np.hstack([np.array(ratio_day)[-1, i], np.array(ratio_night)[-1, i]]))
+
+            t, p = scp.ttest_1samp(np.hstack([np.array(ratio_day)[-1, i], np.array(ratio_night)[-1, i]]), expected)
+            print('\nall %s: ttest: t = %.2f, p = %.2f, d = %.2f' % (hab, t, p, np.abs((mean - expected) / std)))
+
+            mean = np.mean(np.array(ratio_day)[-1, i])
+            std = np.std(np.array(ratio_day)[-1, i])
+
+            t, p = scp.ttest_1samp(np.array(ratio_day)[-1, i], expected)
+            print('day %s: ttest: t = %.2f, p = %.2f, d = %.2f' % (hab, t, p, np.abs((mean - expected) / std)))
+
+            mean = np.mean(np.array(ratio_night)[-1, i])
+            std = np.std(np.array(ratio_night)[-1, i])
+
+            t, p = scp.ttest_1samp(np.array(ratio_night)[-1, i], expected)
+            print('night %s: ttest: t = %.2f, p = %.2f, d = %.2f' % (hab, t, p, np.abs((mean - expected) / std)))
+
+
+
+    ax4_1.errorbar(np.arange(5) - .1, list(map(lambda x: np.mean(x), np.array(male_in_groupsize)[:, 5])),
+                    yerr=list(map(lambda x: np.std(x), np.array(male_in_groupsize)[:, 5])), fmt='none', ecolor='k')
+    # rax[1].plot(np.arange(5) - .1, list(map(lambda x: np.mean(x), np.array(male_in_groupsize)[:, 5])), 'o', color='blue')
+    ax4_1.bar(np.arange(5) - .1, list(map(lambda x: np.mean(x), np.array(male_in_groupsize)[:, 5])), width=.2, color='firebrick', label=u'\u2642')
+
+    ax4_1.errorbar(np.arange(5) + .1, list(map(lambda x: np.mean(x), np.array(female_in_groupsize)[:, 5])),
+                    yerr=list(map(lambda x: np.std(x), np.array(female_in_groupsize)[:, 5])), fmt='none', ecolor='k')
+    # rax[1].plot(np.arange(5) + .1, list(map(lambda x: np.mean(x), np.array(female_in_groupsize)[:, 5])), 'o', color='pink')
+    ax4_1.bar(np.arange(5) + .1, list(map(lambda x: np.mean(x), np.array(female_in_groupsize)[:, 5])), width=.2, color=colors[2], label=u'\u2640')
+
+    ax4_1.set_xticks(np.arange(5))
+    ax4_1.set_xticklabels(['st. stones', 'iso. stones', 'grass', 'gravel', 'water'], rotation = 45)
+    ax4_1.tick_params(labelsize=9)
+    ax4_1.set_ylabel('group size', fontsize=10)
+    ax4_1.legend(loc=1, fontsize=fs-2, frameon=False)
+
+    if do_stats == True:
+        print('\n Mann-Whitney U groupsize male-female')
+        for i, hab in zip(range(5), ['st. stones', 'iso. stones', 'plants', 'gravel', 'open water']):
+            stats, p = scp.mannwhitneyu(np.array(male_in_groupsize)[i, 5], np.array(female_in_groupsize)[i, 5])
+            d = cohans_d(np.array(male_in_groupsize)[i, 5], np.array(female_in_groupsize)[i, 5])
+            print('%s: U = %.0f, p = %.3f, d = %.2f' % (hab, stats, p, d))
+
+        print('\n Mann-Whitney U groupsize between hab')
+        for i, hab in zip(range(5), ['st. stones', 'iso. stones', 'plants', 'gravel', 'open water']):
+            mean = np.mean(np.hstack([np.array(male_in_groupsize)[i, 5], np.array(female_in_groupsize)[i, 5]]))
+            std = np.std(np.hstack([np.array(male_in_groupsize)[i, 5], np.array(female_in_groupsize)[i, 5]]))
+            print('%s: %.2f+-%.2f' % (hab, mean, std))
+            for j, hab2 in zip(np.arange(5)[i + 1:], np.array(['st. stones', 'iso. stones', 'plants', 'gravel', 'open water'])[i + 1:]):
+                stats, p = scp.mannwhitneyu(np.hstack([np.array(male_in_groupsize)[i, 5], np.array(female_in_groupsize)[i, 5]]),
+                                            np.hstack([np.array(male_in_groupsize)[j, 5], np.array(female_in_groupsize)[j, 5]]))
+
+                d = cohans_d(np.hstack([np.array(male_in_groupsize)[i, 5], np.array(female_in_groupsize)[i, 5]]),
+                             np.hstack([np.array(male_in_groupsize)[j, 5], np.array(female_in_groupsize)[j, 5]]))
+                print('%s - %s: U = %.0f, p = %.3f, d = %.2f' % (hab, hab2, stats, p, d))
+
+    for ax in [ax2_0, ax2_1, ax3, ax4_0, ax4_1]:
         ax.tick_params(labelsize=fs-1)
 
     fig.savefig('/home/raab/paper_create/2019raab_habitats/habitat_pref.jpg', dpi=300)
@@ -1725,83 +1826,86 @@ def main():
 
     if True:
         # MALEFEMALE
+        sens_cutoff = [4, 5, 6, 7, 8]
         print('\n\n### figure 2 A ####')
-        print('Spearmanr habitat changes vs. frequency (all)\n')
-        x = []
-        f = []
-        for fish_nr in np.arange(len(d_hab_changes))[:6]:
-            x.extend(d_hab_changes[fish_nr])
-            f.extend(np.ones(len(d_hab_changes[fish_nr]))*fish_freqs[fish_nr])
+        for sco in sens_cutoff:
+            print('\n %.0f males // %.0f females' % (sco, 14-sco))
+            print('Spearmanr habitat changes vs. frequency (all)\n')
+            x = []
+            f = []
+            for fish_nr in np.arange(len(d_hab_changes))[:sco]:
+                x.extend(d_hab_changes[fish_nr])
+                f.extend(np.ones(len(d_hab_changes[fish_nr]))*fish_freqs[fish_nr])
 
-        rho, p = scp.spearmanr(x, f)
-        print('Male Day: rho = %.3f, p = %.3f' % (rho, p))
-        xm1 = x
-        x = []
-        f = []
-        for fish_nr in np.arange(len(d_hab_changes))[6:]:
-            x.extend(d_hab_changes[fish_nr])
-            f.extend(np.ones(len(d_hab_changes[fish_nr]))*fish_freqs[fish_nr])
-        rho, p = scp.spearmanr(x, f)
-        print('Female Day: rho = %.3f, p = %.3f' % (rho, p))
-        xf1 = x
+            rho, p = scp.spearmanr(x, f)
+            print('Male Day: rho = %.3f, p = %.3f' % (rho, p))
+            xm1 = x
+            x = []
+            f = []
+            for fish_nr in np.arange(len(d_hab_changes))[sco:]:
+                x.extend(d_hab_changes[fish_nr])
+                f.extend(np.ones(len(d_hab_changes[fish_nr]))*fish_freqs[fish_nr])
+            rho, p = scp.spearmanr(x, f)
+            print('Female Day: rho = %.3f, p = %.3f' % (rho, p))
+            xf1 = x
 
-        x = []
-        f = []
-        for fish_nr in np.arange(len(n_hab_changes))[:6]:
-            x.extend(n_hab_changes[fish_nr])
-            f.extend(np.ones(len(n_hab_changes[fish_nr]))*fish_freqs[fish_nr])
-        rho, p = scp.spearmanr(x, f)
-        print('Male Night: rho = %.3f, p = %.3f' % (rho, p))
-        xm2 = x
+            x = []
+            f = []
+            for fish_nr in np.arange(len(n_hab_changes))[:sco]:
+                x.extend(n_hab_changes[fish_nr])
+                f.extend(np.ones(len(n_hab_changes[fish_nr]))*fish_freqs[fish_nr])
+            rho, p = scp.spearmanr(x, f)
+            print('Male Night: rho = %.3f, p = %.3f' % (rho, p))
+            xm2 = x
 
-        x = []
-        f = []
-        for fish_nr in np.arange(len(n_hab_changes))[6:]:
-            x.extend(n_hab_changes[fish_nr])
-            f.extend(np.ones(len(n_hab_changes[fish_nr]))*fish_freqs[fish_nr])
-        rho, p = scp.spearmanr(x, f)
-        print('Female Night: rho = %.3f, p = %.3f' % (rho, p))
-        xf2 = x
-        print('########################')
+            x = []
+            f = []
+            for fish_nr in np.arange(len(n_hab_changes))[sco:]:
+                x.extend(n_hab_changes[fish_nr])
+                f.extend(np.ones(len(n_hab_changes[fish_nr]))*fish_freqs[fish_nr])
+            rho, p = scp.spearmanr(x, f)
+            print('Female Night: rho = %.3f, p = %.3f' % (rho, p))
+            xf2 = x
+            print('########################')
 
-        print('\n\n ### figure 2 B ####')
-        print('spearman pref. habitat changes vs. frequency\n')
-        rho, p = scp.spearmanr(n_pref_hab_changes_day[:6], fish_freqs[:6])
-        print('Day Male Day: rho = %.3f, p = %.3f' % (rho, p))
-        rho, p = scp.spearmanr(n_pref_hab_changes_day[6:], fish_freqs[6:])
-        print('Day Female Day: rho = %.3f, p = %.3f' % (rho, p))
+            print('\n\n ### figure 2 B ####')
+            print('spearman pref. habitat changes vs. frequency\n')
+            rho, p = scp.spearmanr(n_pref_hab_changes_day[:sco], fish_freqs[:sco])
+            print('Day Male Day: rho = %.3f, p = %.3f' % (rho, p))
+            rho, p = scp.spearmanr(n_pref_hab_changes_day[sco:], fish_freqs[sco:])
+            print('Day Female Day: rho = %.3f, p = %.3f' % (rho, p))
 
-        rho, p = scp.spearmanr(n_pref_hab_changes_night[:6], fish_freqs[:6])
-        print('Night Male Day: rho = %.3f, p = %.3f' % (rho, p))
-        rho, p = scp.spearmanr(n_pref_hab_changes_night[6:], fish_freqs[6:])
-        print('Night Female Day: rho = %.3f, p = %.3f' % (rho, p))
+            rho, p = scp.spearmanr(n_pref_hab_changes_night[:sco], fish_freqs[:sco])
+            print('Night Male Day: rho = %.3f, p = %.3f' % (rho, p))
+            rho, p = scp.spearmanr(n_pref_hab_changes_night[sco:], fish_freqs[sco:])
+            print('Night Female Day: rho = %.3f, p = %.3f' % (rho, p))
 
-        print('#########################')
+            print('#########################')
 
-        print('\n\n ### figure 2 C ####')
-        # print('Wilcox rank habitat changes day vs. night (all)\n')
-        # stat, p = scp.wilcoxon(xm1, xm2)
-        # print('Male: stat = %.2f, p = %.3f' % (stat, p))
-        # stat, p = scp.wilcoxon(xf1, xf2)
-        # print('Female: stat = %.2f, p = %.3f' % (stat, p))
-        print('spearman habitat changes day vs. night (all)\n')
-        stat, p = scp.spearmanr(xm1, xm2)
-        print('Male: rho = %.2f, p = %.3f' % (stat, p))
-        stat, p = scp.spearmanr(xf1, xf2)
-        print('Female: rho = %.2f, p = %.3f' % (stat, p))
-        print('###########################')
+            print('\n\n ### figure 2 C ####')
+            # print('Wilcox rank habitat changes day vs. night (all)\n')
+            # stat, p = scp.wilcoxon(xm1, xm2)
+            # print('Male: stat = %.2f, p = %.3f' % (stat, p))
+            # stat, p = scp.wilcoxon(xf1, xf2)
+            # print('Female: stat = %.2f, p = %.3f' % (stat, p))
+            print('spearman habitat changes day vs. night (all)\n')
+            stat, p = scp.spearmanr(xm1, xm2)
+            print('Male: rho = %.2f, p = %.3f' % (stat, p))
+            stat, p = scp.spearmanr(xf1, xf2)
+            print('Female: rho = %.2f, p = %.3f' % (stat, p))
+            print('###########################')
 
-        print('\n\n### figure 2 D ####')
-        print('Wilcoxon: pref. change day vs night')
-        stat, p = scp.wilcoxon(n_pref_hab_changes_day[:6], n_pref_hab_changes_night[:6])
-        print('Male: stat = %.0f, p = %.3f' % (stat, p))
-        stat, p = scp.wilcoxon(n_pref_hab_changes_day[6:], n_pref_hab_changes_night[6:])
-        print('Female: stat = %.0f, p = %.3f' % (stat, p))
+            print('\n\n### figure 2 D ####')
+            print('Wilcoxon: pref. change day vs night')
+            stat, p = scp.wilcoxon(n_pref_hab_changes_day[:sco], n_pref_hab_changes_night[:sco])
+            print('Male: stat = %.0f, p = %.3f' % (stat, p))
+            stat, p = scp.wilcoxon(n_pref_hab_changes_day[sco:], n_pref_hab_changes_night[sco:])
+            print('Female: stat = %.0f, p = %.3f' % (stat, p))
 
-        print('Wilcoxon: pref. change day vs night')
-        stat, p = scp.wilcoxon(n_pref_hab_changes_day, n_pref_hab_changes_night)
-        print('together: stat = %.0f, p = %.3f' % (stat, p))
-        print('####################')
+            print('Wilcoxon: pref. change day vs night')
+            stat, p = scp.wilcoxon(n_pref_hab_changes_day, n_pref_hab_changes_night)
+            print('together: stat = %.0f, p = %.3f' % (stat, p))
+            print('####################')
 
 
 
@@ -2232,13 +2336,15 @@ def main():
         bc = bins[:-1] + (bins[1] - bins[0]) / 2
 
         fit, _ = curve_fit(efunc, bc[5:], n[5:])
-        day_tau.append(fit[1])
+        _, tau = scp.expon.fit(day_d_transition_times[fish_nr], floc=0)
+        day_tau.append(np.mean(day_d_transition_times[fish_nr]))
 
         n, bins = np.histogram(night_d_transition_times[fish_nr], bins= np.arange(np.percentile(night_d_transition_times[fish_nr], 5), np.percentile(night_d_transition_times[fish_nr], 95), 1))
         n = n / np.sum(n) / (bins[1] - bins[0])
         bc = bins[:-1] + (bins[1] - bins[0]) / 2
         fit, _ = curve_fit(efunc, bc[5:], n[5:])
-        night_tau.append(fit[1])
+        _, tau = scp.expon.fit(night_d_transition_times[fish_nr], floc=0)
+        night_tau.append(np.mean(night_d_transition_times[fish_nr]))
 
 
     bp = ax2_2.boxplot([1/ np.array(day_tau[:6]), 1/np.array(night_tau[:6]), [], 1/np.array(day_tau[6:]), 1/np.array(night_tau[6:])], sym='', patch_artist=True)
@@ -2255,23 +2361,32 @@ def main():
     ax2_2.set_xticks([1.5, 4.5])
     ax2_2.set_xticklabels(['male', 'female'], rotation=45)
 
-    ax2_2.text(1.5, .225, '*', va = 'center', ha='center', fontsize=fs)
+    ax2_2.text(1.5, .3125, '**', va = 'center', ha='center', fontsize=fs)
+    ax2_2.text(4.5, .3125, '*', va = 'center', ha='center', fontsize=fs)
 
 
     if True:
         # MALEFEMALE
         print('\n\n ### figure 2 F ####')
-        print('\n Wilcoxon transition rate day / night')
-        stat, p = scp.mannwhitneyu(1/np.array(day_tau[:6]), 1/np.array(night_tau[:6]))
-        print('Male: U = %.3f, p = %.3f' % (stat, p*2))
-        stat, p = scp.mannwhitneyu(1/np.array(day_tau[6:]), 1/np.array(night_tau[6:]))
-        print('Female: U = %.3f, p = %.3f' % (stat, p*2))
+        # sens_cutoff = [4, 5, 6, 7, 8]
+        sens_cutoff = [6]
+        for sco in sens_cutoff:
+            print('\n %.0f males // %.0f females' % (sco, 14 - sco))
+            print('\n Wilcoxon transition rate day / night')
+            stat, p = scp.mannwhitneyu(1/np.array(day_tau[:sco]), 1/np.array(night_tau[:sco]))
+            d = cohans_d(1/np.array(day_tau[:sco]), 1/np.array(night_tau[:sco]))
+            print('Male: U = %.3f, p = %.3f, d = %.2f' % (stat, p*2, d))
+            stat, p = scp.mannwhitneyu(1/np.array(day_tau[sco:]), 1/np.array(night_tau[sco:]))
+            d = cohans_d(1 / np.array(day_tau[sco:]), 1 / np.array(night_tau[sco:]))
+            print('Female: U = %.3f, p = %.3f, d = %.2f' % (stat, p*2, d))
 
-        U, p = scp.mannwhitneyu(1/np.array(day_tau[:6]), 1/np.array(day_tau[6:]))
-        print('Day: U = %.3f, p = %.3f' %(U, p*2))
-        U, p = scp.mannwhitneyu(1/np.array(night_tau[:6]), 1/np.array(night_tau[6:]))
-        print('night: U = %.3f, p = %.3f' %(U, p*2))
-        print('#########################')
+            U, p = scp.mannwhitneyu(1/np.array(day_tau[:sco]), 1/np.array(day_tau[sco:]))
+            d = cohans_d(1 / np.array(day_tau[:sco]), 1 / np.array(day_tau[sco:]))
+            print('Day: U = %.3f, p = %.3f, d = %.2f' %(U, p*2, d))
+            U, p = scp.mannwhitneyu(1/np.array(night_tau[:sco]), 1/np.array(night_tau[sco:]))
+            d = cohans_d(1 / np.array(night_tau[:sco]), 1 / np.array(night_tau[sco:]))
+            print('night: U = %.3f, p = %.3f, d = %.2f' %(U, p*2, d))
+            print('#########################')
 
 
     # ax2_2.set_xticks([1, 2])
@@ -2280,9 +2395,9 @@ def main():
     # fig.text(10.25 / 18, 5.5 / 18, 'F', ha='center', va='center', fontsize=fs + 6)
     fig.text(10.25 / 18, 7.5 / 8, 'B', ha='center', va='center', fontsize=fs + 6)
 
-    ax2_2.set_ylim([0, 0.25])
-    ax2_2.set_yticks(np.arange(0, 0.26, 0.05))
-    ax2_2.set_yticklabels(['0', '.05', '.10', '.15', '.20', '.25'])
+    ax2_2.set_ylim([0, 0.35])
+    ax2_2.set_yticks(np.arange(0, 0.36, 0.1))
+    ax2_2.set_yticklabels(['0', '.10', '.20', '.30'])
 
     # ax2_3 = fig.add_axes([15.25/18, 1.5/18, 1.5/18, 4/18])
     ax2_3 = fig.add_axes([15.25/18, 1.5/8, 1.5/18, 6/8])
@@ -2320,23 +2435,31 @@ def main():
 
     if True:
         # MALEFEMALE
-        print('\n\n ### figure 2 G ####')
-        print('\n Mann whitney U transition rate day / night')
-        stat, p = scp.mannwhitneyu(day_mean_tt[:6], night_mean_tt[:6])
-        print('Male: U = %.3f, p = %.3f' % (stat, p*2))
-        stat, p = scp.mannwhitneyu(day_mean_tt[6:], night_mean_tt[6:])
-        print('Female: U = %.3f, p = %.3f' % (stat, p*2))
+        print('\n\n ### figure 2 wighted ####')
+        # sens_cutoff = [4, 5, 6, 7, 8]
+        sens_cutoff = [6]
+        for sco in sens_cutoff:
+            print('\n %.0f males // %.0f females' % (sco, 14 - sco))
+            print('\n Mann whitney U transition rate day / night')
+            stat, p = scp.mannwhitneyu(day_mean_tt[:sco], night_mean_tt[:sco])
+            d = cohans_d(day_mean_tt[:sco], night_mean_tt[:sco])
+            print('Male: U = %.3f, p = %.3f, d = %.2f' % (stat, p*2, d))
+            stat, p = scp.mannwhitneyu(day_mean_tt[sco:], night_mean_tt[sco:])
+            d = cohans_d(day_mean_tt[sco:], night_mean_tt[sco:])
+            print('Female: U = %.3f, p = %.3f, d = %.2f' % (stat, p*2, d))
 
-        print('\n Mann whitney U transition rate day / night')
-        stat, p = scp.mannwhitneyu(day_mean_tt[:6], day_mean_tt[6:])
-        print('Day: U = %.3f, p = %.3f' % (stat, p*2))
-        stat, p = scp.mannwhitneyu(night_mean_tt[6:], night_mean_tt[:6])
-        print('Night: U = %.3f, p = %.3f' % (stat, p*2))
+            print('\n Mann whitney U transition rate day / night')
+            stat, p = scp.mannwhitneyu(day_mean_tt[:sco], day_mean_tt[sco:])
+            d = cohans_d(day_mean_tt[:sco], day_mean_tt[sco:])
+            print('Day: U = %.3f, p = %.3f, d = %.2f' % (stat, p*2, d))
+            stat, p = scp.mannwhitneyu(night_mean_tt[sco:], night_mean_tt[:sco])
+            d = cohans_d(night_mean_tt[sco:], night_mean_tt[:sco])
+            print('Night: U = %.3f, p = %.3f, d = %.2f' % (stat, p*2, d))
 
-        print('#########################')
+            print('#########################')
 
-    ax2_3.text(1.5, 45, '*', va = 'center', ha='center', fontsize=fs)
-    ax2_3.text(3.5, 45, '*', va = 'center', ha='center', fontsize=fs)
+    ax2_3.text(1.5, 45, '**', va = 'center', ha='center', fontsize=fs)
+    ax2_3.text(4.5, 45, '*', va = 'center', ha='center', fontsize=fs)
 
     for ax in [ax2_0, ax2_0a, ax2_1a, ax2_1, ax2_2, ax2_3]:
         ax.tick_params(labelsize=fs - 1)
