@@ -8,6 +8,66 @@ import scipy.stats as scp
 from scipy.optimize import curve_fit
 from tqdm import tqdm
 
+def Q10(datafile, fish_nr_in_rec):
+    def Q10_val(t0, t1, f0, f1):
+        return (f1 / f0)**(10/(t1 -t0))
+
+    fish_freq_temp = [[], [], [], [], [], [], [], [], [], [], [], [], [], []]
+    temp = [26, 26, 26, 26.3, 26.0, 26.0, 25.8, 25.8, 25.8, 25.4, 25.4, 25.2, 25.2, 25.1, 25.1, 25.0, 25.0, 24.9, 24.9, 24.8, 24.8, 24.9]
+    shift = [0, 5760, 12840, 72420, 169440, 204840, 243900, 255360, 270240, 335400, 362400, 418440, 445380, 505200, 543240, 592740, 630660, 678780, 713700, 765540, 802680, 852840]
+
+    for datei_nr in range(len(datafile)):
+        fund_v, ident_v, idx_v, times_v, sign_v = loaddata(datafile[datei_nr])
+        # times_v += shift[datei_nr]
+
+        for fish_nr in range(len(fish_nr_in_rec)):
+            if np.isnan(fish_nr_in_rec[fish_nr][datei_nr]):
+                fish_freq_temp[fish_nr].append([np.nan, np.nan])
+
+                continue
+
+            f = fund_v[ident_v == fish_nr_in_rec[fish_nr][datei_nr]]
+            t = times_v[ident_v == fish_nr_in_rec[fish_nr][datei_nr]]
+
+            if len(t[t < 1000]) == 0:
+                fish_freq_temp[fish_nr].append([np.nan, np.nan])
+                continue
+            else:
+                fish_freq_temp[fish_nr].append([np.median(f[t < 100]), temp[datei_nr]])
+
+    all_Q10 = [[], [], [], [], [], [], [], [], [], [], [], [], [], []]
+    for fish in range(len(fish_freq_temp)):
+        for i in range(len(fish_freq_temp[fish])):
+            for j in np.arange(i+1, len(fish_freq_temp[fish])):
+                if np.isnan(fish_freq_temp[fish][i][1]):
+                    continue
+                if fish_freq_temp[fish][i][1] == fish_freq_temp[fish][j][1]:
+                    continue
+                Cq10 = Q10_val(fish_freq_temp[fish][i][1], fish_freq_temp[fish][j][1], fish_freq_temp[fish][i][0], fish_freq_temp[fish][j][0])
+                all_Q10[fish].append(Cq10)
+    nonan_all_Q10 = []
+    n = []
+    for q in all_Q10:
+        nonan_all_Q10.append(np.array(q)[~np.isnan(np.array(q))])
+        n.append(len(nonan_all_Q10[-1]))
+
+    nonan_all_Q10.append([])
+    nonan_all_Q10.append(np.hstack(nonan_all_Q10))
+
+    fig, ax = plt.subplots(figsize=(20/2.54, 12/2.54))
+    ax.boxplot(nonan_all_Q10, sym='')
+    for enu, x in enumerate(n):
+        ax.text(enu+1, 0.25, '%.0f' % x, ha='center', va='center')
+        ax.text(enu+1, np.median(nonan_all_Q10[enu]), '%.2f' % np.median(nonan_all_Q10[enu]), ha='center')
+
+    ax.text(16, np.median(nonan_all_Q10[-1]), '%.2f' % np.median(nonan_all_Q10[-1]), ha = 'center')
+    # ax.boxplot(np.hstack(nonan_all_Q10), positions = [16], sym='')
+    ax.set_ylim([0, 5])
+    # ax.set_xlim([0, 17])
+    plt.show()
+    embed()
+    quit()
+
 def efunc(x, tau):
     return np.exp(-x/tau) / tau
 
@@ -24,6 +84,7 @@ def loaddata(datafile):
 
 def create_plot(datafile, shift, fish_nr_in_rec, colors, ax = None):
     print('plotting traces')
+
     fish_freqs = []
     if ax == None:
         fig, ax = plt.subplots(facecolor='white', figsize=(20. / 2.54, 12. / 2.54))
@@ -50,10 +111,7 @@ def create_plot(datafile, shift, fish_nr_in_rec, colors, ax = None):
     shift = [0, 5760, 12840, 72420, 169440, 204840, 243900, 255360, 270240, 335400, 362400, 418440, 445380, 505200,
                      543240, 592740, 630660, 678780, 713700, 765540, 802680, 852840, 1559460, 2161500]
 
-    # ax1.plot(shift, temp, color='red', marker='.')
-    # ax1.set_xticks([])
-    # ax1.set_ylabel('Temp.$^\circ$C')
-    # ax1.set_xlim(ax.get_xlim())
+
     if ax == None:
         ax.set_ylabel('Frequenz [Hz]')
         ax.set_xlabel('Datum')
@@ -314,6 +372,9 @@ def main():
         [np.nan, np.nan, np.nan, np.nan, np.nan, np.nan, np.nan, np.nan, np.nan, 39778, np.nan, 1227, 2, 6, 59560, 1878, 81, 57592, np.nan, 29543, 16994, 37650],
         [np.nan, np.nan, np.nan, np.nan, np.nan, np.nan, np.nan, np.nan, np.nan, np.nan, np.nan, np.nan, np.nan, np.nan, np.nan, 56947, 38877, 8, 34, 12405, 388, 25536],
         [np.nan, np.nan, np.nan, np.nan, np.nan, np.nan, 17544, 47, 31, 14, 26840, 10, 63, 48125, 146, 56950, 39918, 6, 25858, 6, 88393, 189]]
+
+    Q10(datafile, fish_nr_in_rec)
+
 
     colors = ['#BA2D22', '#53379B', '#F47F17', '#3673A4', '#AAB71B', '#DC143C', '#1E90FF', '#BA2D22', '#53379B', '#F47F17', '#3673A4', '#AAB71B', '#DC143C', '#1E90FF']
 
