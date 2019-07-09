@@ -373,7 +373,7 @@ def main():
         [np.nan, np.nan, np.nan, np.nan, np.nan, np.nan, np.nan, np.nan, np.nan, np.nan, np.nan, np.nan, np.nan, np.nan, np.nan, 56947, 38877, 8, 34, 12405, 388, 25536],
         [np.nan, np.nan, np.nan, np.nan, np.nan, np.nan, 17544, 47, 31, 14, 26840, 10, 63, 48125, 146, 56950, 39918, 6, 25858, 6, 88393, 189]]
 
-    Q10(datafile, fish_nr_in_rec)
+    # Q10(datafile, fish_nr_in_rec)
 
 
     colors = ['#BA2D22', '#53379B', '#F47F17', '#3673A4', '#AAB71B', '#DC143C', '#1E90FF', '#BA2D22', '#53379B', '#F47F17', '#3673A4', '#AAB71B', '#DC143C', '#1E90FF']
@@ -2176,6 +2176,125 @@ def main():
         ax.xaxis.set_ticks_position('bottom')
 
     fig.savefig('/home/raab/paper_create/2019raab_habitats/transitions.jpg', dpi=300)
+
+    plot_for_Jan = False
+    if plot_for_Jan:
+        fig = plt.figure(figsize=(20/2.54, 12/2.54), facecolor='white')
+        ax = fig.add_axes([.1, .15, .85, .8])
+        #
+        # ax = fig.add_axes([.1, .15, .35, .8])
+        # ax1 = fig.add_axes([.55, .6, .4, .35])
+        # ax2 = fig.add_axes([.55, .15, .4, .35])
+
+        col = colors[:7]
+        col.append('k')
+        for fish_nr in range(len(dn_hab_changes))[:6]:
+            m = 'o'
+            if fish_nr == 0:
+                ax.errorbar(np.mean(dn_hab_changes[fish_nr][1::2][(dn_hab_changes[fish_nr][1::2] != 0) & (dn_hab_changes[fish_nr][::2] != 0)]),
+                               np.mean(dn_hab_changes[fish_nr][::2][(dn_hab_changes[fish_nr][1::2] != 0) & (dn_hab_changes[fish_nr][::2] != 0)]),
+                               xerr = np.std(dn_hab_changes[fish_nr][1::2][(dn_hab_changes[fish_nr][1::2] != 0) & (dn_hab_changes[fish_nr][::2] != 0)]),
+                               yerr = np.std(dn_hab_changes[fish_nr][::2][(dn_hab_changes[fish_nr][1::2] != 0) & (dn_hab_changes[fish_nr][::2] != 0)]),
+                               color='dodgerblue', marker=m, markersize=5, label=u'\u2642')
+            else:
+                ax.errorbar(np.mean(dn_hab_changes[fish_nr][1::2][(dn_hab_changes[fish_nr][1::2] != 0) & (dn_hab_changes[fish_nr][::2] != 0)]),
+                               np.mean(dn_hab_changes[fish_nr][::2][(dn_hab_changes[fish_nr][1::2] != 0) & (dn_hab_changes[fish_nr][::2] != 0)]),
+                               xerr = np.std(dn_hab_changes[fish_nr][1::2][(dn_hab_changes[fish_nr][1::2] != 0) & (dn_hab_changes[fish_nr][::2] != 0)]),
+                               yerr = np.std(dn_hab_changes[fish_nr][::2][(dn_hab_changes[fish_nr][1::2] != 0) & (dn_hab_changes[fish_nr][::2] != 0)]),
+                               color='dodgerblue', marker=m, markersize=5)
+        for enu, fish_nr in enumerate(range(len(dn_hab_changes))[6:]):
+            m = 'o'
+            if enu == 0:
+                ax.errorbar(np.mean(dn_hab_changes[fish_nr][1::2][(dn_hab_changes[fish_nr][1::2] != 0) & (dn_hab_changes[fish_nr][::2] != 0)]),
+                               np.mean(dn_hab_changes[fish_nr][::2][(dn_hab_changes[fish_nr][1::2] != 0) & (dn_hab_changes[fish_nr][::2] != 0)]),
+                               xerr = np.std(dn_hab_changes[fish_nr][1::2][(dn_hab_changes[fish_nr][1::2] != 0) & (dn_hab_changes[fish_nr][::2] != 0)]),
+                               yerr = np.std(dn_hab_changes[fish_nr][::2][(dn_hab_changes[fish_nr][1::2] != 0) & (dn_hab_changes[fish_nr][::2] != 0)]),
+                               color = 'deeppink', marker=m, markersize=5, label = u'\u2640')
+            else:
+                ax.errorbar(np.mean(dn_hab_changes[fish_nr][1::2][(dn_hab_changes[fish_nr][1::2] != 0) & (dn_hab_changes[fish_nr][::2] != 0)]),
+                               np.mean(dn_hab_changes[fish_nr][::2][(dn_hab_changes[fish_nr][1::2] != 0) & (dn_hab_changes[fish_nr][::2] != 0)]),
+                               xerr = np.std(dn_hab_changes[fish_nr][1::2][(dn_hab_changes[fish_nr][1::2] != 0) & (dn_hab_changes[fish_nr][::2] != 0)]),
+                               yerr = np.std(dn_hab_changes[fish_nr][::2][(dn_hab_changes[fish_nr][1::2] != 0) & (dn_hab_changes[fish_nr][::2] != 0)]),
+                               color = 'deeppink', marker=m, markersize=5)
+        ax.plot([0, 6000], [0, 6000], 'k-', lw=1)
+
+        ax.set_xlabel('day transitions [1000/12h]', fontsize=fs)
+        ax.set_xlim([0, 5000])
+        ax.set_xticks(np.arange(0, 5001, 1000, dtype=int))
+        ax.set_xticklabels(['0', '1', '2', '3', '4', '5'])
+
+        ax.set_ylabel('night transitions\n[1000/12h]', fontsize=fs)
+        ax.set_ylim([0, 14000])
+        ax.set_yticks(np.arange(0, 14001, 2000))
+        ax.set_yticklabels(['0', '2', '4', '6', '8', '10', '12', '14'])
+        ax.legend(loc=1, frameon=False, fontsize=fs)
+
+        ax.tick_params(labelsize=fs - 1)
+
+        ######################################
+        for fish_nr in range(len(dn_hab_changes))[:6]:
+            m = 'o'
+            if fish_nr == 0:
+                ax1.errorbar(fish_freqs[fish_nr],
+                               np.mean(dn_hab_changes[fish_nr][::2][(dn_hab_changes[fish_nr][1::2] != 0) & (dn_hab_changes[fish_nr][::2] != 0)]),
+                               yerr = np.std(dn_hab_changes[fish_nr][::2][(dn_hab_changes[fish_nr][1::2] != 0) & (dn_hab_changes[fish_nr][::2] != 0)]),
+                               color='dodgerblue', marker=m, markersize=5, label=u'\u2642')
+            else:
+                ax1.errorbar(fish_freqs[fish_nr],
+                               np.mean(dn_hab_changes[fish_nr][::2][(dn_hab_changes[fish_nr][1::2] != 0) & (dn_hab_changes[fish_nr][::2] != 0)]),
+                               yerr = np.std(dn_hab_changes[fish_nr][::2][(dn_hab_changes[fish_nr][1::2] != 0) & (dn_hab_changes[fish_nr][::2] != 0)]),
+                               color='dodgerblue', marker=m, markersize=5)
+        for enu, fish_nr in enumerate(range(len(dn_hab_changes))[6:]):
+            m = 'o'
+            if enu == 0:
+                ax1.errorbar(fish_freqs[fish_nr],
+                               np.mean(dn_hab_changes[fish_nr][::2][(dn_hab_changes[fish_nr][1::2] != 0) & (dn_hab_changes[fish_nr][::2] != 0)]),
+                               yerr = np.std(dn_hab_changes[fish_nr][::2][(dn_hab_changes[fish_nr][1::2] != 0) & (dn_hab_changes[fish_nr][::2] != 0)]),
+                               color = 'deeppink', marker=m, markersize=5, label = u'\u2640')
+            else:
+                ax1.errorbar(fish_freqs[fish_nr],
+                               np.mean(dn_hab_changes[fish_nr][::2][(dn_hab_changes[fish_nr][1::2] != 0) & (dn_hab_changes[fish_nr][::2] != 0)]),
+                               yerr = np.std(dn_hab_changes[fish_nr][::2][(dn_hab_changes[fish_nr][1::2] != 0) & (dn_hab_changes[fish_nr][::2] != 0)]),
+                               color = 'deeppink', marker=m, markersize=5)
+
+        ax1.set_ylabel('night transitions\n[1000/12h]', fontsize=fs)
+        ax1.set_ylim([0, 14000])
+        ax1.set_yticks(np.arange(0, 14001, 2000))
+        ax1.set_yticklabels(['0', '2', '4', '6', '8', '10', '12', '14'])
+
+
+        ################
+        for fish_nr in range(len(dn_hab_changes))[:6]:
+            m = 'o'
+            if fish_nr == 0:
+                ax2.errorbar(fish_freqs[fish_nr],
+                               np.mean(dn_hab_changes[fish_nr][1::2][(dn_hab_changes[fish_nr][1::2] != 0) & (dn_hab_changes[fish_nr][::2] != 0)]),
+                               yerr = np.std(dn_hab_changes[fish_nr][1::2][(dn_hab_changes[fish_nr][1::2] != 0) & (dn_hab_changes[fish_nr][::2] != 0)]),
+                               color='dodgerblue', marker=m, markersize=5, label=u'\u2642')
+            else:
+                ax2.errorbar(fish_freqs[fish_nr],
+                               np.mean(dn_hab_changes[fish_nr][1::2][(dn_hab_changes[fish_nr][1::2] != 0) & (dn_hab_changes[fish_nr][::2] != 0)]),
+                               yerr = np.std(dn_hab_changes[fish_nr][1::2][(dn_hab_changes[fish_nr][1::2] != 0) & (dn_hab_changes[fish_nr][::2] != 0)]),
+                               color='dodgerblue', marker=m, markersize=5)
+        for enu, fish_nr in enumerate(range(len(dn_hab_changes))[6:]):
+            m = 'o'
+            if enu == 0:
+                ax2.errorbar(fish_freqs[fish_nr],
+                               np.mean(dn_hab_changes[fish_nr][1::2][(dn_hab_changes[fish_nr][1::2] != 0) & (dn_hab_changes[fish_nr][::2] != 0)]),
+                               yerr = np.std(dn_hab_changes[fish_nr][1::2][(dn_hab_changes[fish_nr][1::2] != 0) & (dn_hab_changes[fish_nr][::2] != 0)]),
+                               color = 'deeppink', marker=m, markersize=5, label = u'\u2640')
+            else:
+                ax2.errorbar(fish_freqs[fish_nr],
+                               np.mean(dn_hab_changes[fish_nr][1::2][(dn_hab_changes[fish_nr][1::2] != 0) & (dn_hab_changes[fish_nr][::2] != 0)]),
+                               yerr = np.std(dn_hab_changes[fish_nr][1::2][(dn_hab_changes[fish_nr][1::2] != 0) & (dn_hab_changes[fish_nr][::2] != 0)]),
+                               color = 'deeppink', marker=m, markersize=5)
+
+        ax2.set_ylabel('day transitions\n[1000/12h]', fontsize=fs)
+        ax2.set_ylim([0, 5000])
+        ax2.set_yticks(np.arange(0, 5001, 1000, dtype=int))
+        ax2.set_yticklabels(['0', '1', '2', '3', '4', '5'])
+        #
+        ax2.set_xlabel('EOD frequency [Hz]', fontsize=fs)
 
     ##############################################
     fig = plt.figure(facecolor='white', figsize=(18/2.54, 8/2.54))
