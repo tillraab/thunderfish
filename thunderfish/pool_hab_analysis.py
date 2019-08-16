@@ -65,8 +65,8 @@ def Q10(datafile, fish_nr_in_rec):
     ax.set_ylim([0, 5])
     # ax.set_xlim([0, 17])
     plt.show()
-    embed()
-    quit()
+    # embed()
+    # quit()
 
 def efunc(x, tau):
     return np.exp(-x/tau) / tau
@@ -82,12 +82,16 @@ def loaddata(datafile):
 
     return fund_v,ident_v,idx_v,times_v,sign_v
 
-def create_plot(datafile, shift, fish_nr_in_rec, colors, ax = None):
+def create_plot(datafile, shift, fish_nr_in_rec, colors, dn_borders, last_time, ax = None):
     print('plotting traces')
 
     fish_freqs = []
+    solo_plot = False
     if ax == None:
-        fig, ax = plt.subplots(facecolor='white', figsize=(20. / 2.54, 12. / 2.54))
+        # fig, ax = plt.subplots(facecolor='white', figsize=(20. / 2.54, 10. / 2.54))
+        fig = plt.figure(facecolor='white', figsize=(20. / 2.54, 10. / 2.54))
+        ax = fig.add_axes([0.1, 0.1, 0.85, 0.85])
+        solo_plot = True
     for datei_nr in range(len(datafile)):
         fund_v, ident_v, idx_v, times_v, sign_v = loaddata(datafile[datei_nr])
         times_v += shift[datei_nr]
@@ -112,75 +116,25 @@ def create_plot(datafile, shift, fish_nr_in_rec, colors, ax = None):
                      543240, 592740, 630660, 678780, 713700, 765540, 802680, 852840, 1559460, 2161500]
 
 
-    if ax == None:
-        ax.set_ylabel('Frequenz [Hz]')
-        ax.set_xlabel('Datum')
-        ticks = np.arange(110 * 60 + 9 * 60 * 60, times_v[-1], 96*60*60)
-        tick_labels = ['24:00\n05.05.18', '24:00\n09.05.18','24:00\n13.05.18', '24:00\n17.05.18','24:00\n21.05.18', '24:00\n25.05.18', '24:00\n29.05.18']
-        ax.set_xticks(ticks)
-        ax.set_xticklabels(tick_labels)
+    if solo_plot:
+        for ns, ne in zip(dn_borders[::2], dn_borders[1::2]):
+            ax.fill_between([ns, ne], [650, 650], [970, 970], color='#888888')
+        ax.set_yticks([700, 800, 900])
 
-        #red_line = mlines.Line2D([], [], color='red', label='Median')
-        #blue_patch = mpatches.Patch(color='cornflowerblue', label='Interquartilenbereich')
-        grey_patch = mpatches.Patch(color='grey', alpha=0.5, label='Nacht')
-        plt.legend(handles=[grey_patch])
+        ax.set_xlim([dn_borders[0], dn_borders[dn_borders < last_time][-1]])
+        ax.set_ylim([650, 970])
 
-        fisch1_patch = mpatches.Patch(color='#BA2D22', label='Fisch 1', )
-        fisch2_patch = mpatches.Patch(color='#53379B', label='Fisch 2', )
-        fisch3_patch = mpatches.Patch(color='#F47F17', label='Fisch 3', )
-        fisch4_patch = mpatches.Patch(color='#3673A4', label='Fisch 4', )
-        fisch5_patch = mpatches.Patch(color='#AAB71B', label='Fisch 5', )
-        fisch6_patch = mpatches.Patch(color='#DC143C', label='Fisch 6', )
-        fisch7_patch = mpatches.Patch(color='#1E90FF', label='Fisch 7', )
-        fisch8_patch = mpatches.Patch(color='#BA2D22', label='Fisch 8', )
-        fisch9_patch = mpatches.Patch(color='#53379B', label='Fisch 9', )
-        fisch10_patch = mpatches.Patch(color='#F47F17', label='Fisch 10', )
-        fisch11_patch = mpatches.Patch(color='#3673A4', label='Fisch 11', )
-        fisch12_patch = mpatches.Patch(color='#AAB71B', label='Fisch 12', )
-        fisch13_patch = mpatches.Patch(color='#DC143C', label='Fisch 13', )
-        fisch14_patch = mpatches.Patch(color='#1E90FF', label='Fisch 14', )
-        # grey_patch = mpatches.Patch(color='grey', alpha=0.5, label='Nacht')
-        plt.legend(bbox_to_anchor=(-0.1, 1.04, 1.1, 1.04), borderaxespad=0, loc=3,
-                   handles=[fisch1_patch, fisch2_patch, fisch3_patch, fisch4_patch, fisch5_patch, fisch6_patch,
-                            fisch7_patch, fisch8_patch, fisch9_patch, fisch10_patch, fisch11_patch, fisch12_patch,
-                            fisch13_patch, fisch14_patch], mode="expand", ncol=7)
-        # grey_patch = mpatches.Patch(color='grey', alpha=0.5, label='Nacht')
-        ax.set_ylabel('frequency [Hz]')
-        ax.set_xlabel('time [s]')
+        ax.set_ylabel('EOD frequency [Hz]', fontsize = 12)
+        # ax.set_xlabel('Datum')
 
-    # oben = ax.get_ylim()[1]
-    # unten = ax.get_ylim()[0]
-    #
-    # ax.fill_between([6600, 49800], [oben, oben], [unten, unten], color="grey", alpha=0.3)  # 1
-    # ax.fill_between([93000, 136200], [oben, oben], [unten, unten], color="grey", alpha=0.3)  # 2
-    # ax.fill_between([179400, 222600], [oben, oben], [unten, unten], color="grey", alpha=0.3)  # 3
-    # ax.fill_between([265800, 309000], [oben, oben], [unten, unten], color="grey", alpha=0.3)  # 4
-    # ax.fill_between([352200, 395400], [oben, oben], [unten, unten], color="grey", alpha=0.3)  # 5
-    # ax.fill_between([438600, 481800], [oben, oben], [unten, unten], color="grey", alpha=0.3)  # 6
-    # ax.fill_between([525000, 568200], [oben, oben], [unten, unten], color="grey", alpha=0.3)  # 7
-    # ax.fill_between([611400, 654600], [oben, oben], [unten, unten], color="grey", alpha=0.3)  # 8
-    # ax.fill_between([697800, 741000], [oben, oben], [unten, unten], color="grey", alpha=0.3)  # 9
-    # ax.fill_between([784200, 827400], [oben, oben], [unten, unten], color="grey", alpha=0.3)  # 10
-    # ax.fill_between([870600, 913800], [oben, oben], [unten, unten], color="grey", alpha=0.3)  # 11
-    # ax.fill_between([957000, 1000200],[oben, oben],[unten, unten], color="grey", alpha= 0.3) #12
-    # ax.fill_between([1043400, 1086600],[oben, oben],[unten, unten], color="grey", alpha= 0.3) #13
-    # ax.fill_between([1129800, 1173000],[oben, oben],[unten, unten], color="grey", alpha= 0.3) #14
-    # ax.fill_between([1216200, 1259400],[oben, oben],[unten, unten], color="grey", alpha= 0.3) #15
-    # ax.fill_between([1302600, 1345800],[oben, oben],[unten, unten], color="grey", alpha= 0.3) #16
-    # ax.fill_between([1389000, 1432200],[oben, oben],[unten, unten], color="grey", alpha= 0.3) #17
-    # ax.fill_between([1475400, 1518600],[oben, oben],[unten, unten], color="grey", alpha= 0.3) #18
-    # ax.fill_between([1561800, 1605000], [oben, oben], [unten, unten], color="grey", alpha=0.3)  # 19
-    # ax.fill_between([1648200, 1691400],[oben, oben],[unten, unten], color="grey", alpha= 0.3) #20
-    # ax.fill_between([1734600, 1777800],[oben, oben],[unten, unten], color="grey", alpha= 0.3) #21
-    # ax.fill_between([1821000, 1864200],[oben, oben],[unten, unten], color="grey", alpha= 0.3) #22
-    # ax.fill_between([1907400, 1950600],[oben, oben],[unten, unten], color="grey", alpha= 0.3) #23
-    # ax.fill_between([1993800, 2037000],[oben, oben],[unten, unten], color="grey", alpha= 0.3) #24
-    # ax.fill_between([2080200, 2123400],[oben, oben],[unten, unten], color="grey", alpha= 0.3) #25
-    # ax.fill_between([2166600, 2209800], [oben, oben], [unten, unten], color="grey", alpha=0.3)  # 26
-    # ax.fill_between([2253000, 2296200],[oben, oben],[unten, unten], color="grey", alpha= 0.3) #27
-    # ax.fill_between([2339400, 2382600],[oben, oben],[unten, unten], color="grey", alpha= 0.3) #28
+        time_ticks = np.arange(110 * 60 + 18 * 60 * 60, last_time, 24 * 60 * 60)
+        ax.set_xticklabels([])
+        ax.set_xticks(time_ticks)
+        ax.set_xticklabels(['day 1', 'day 2', 'day 3', 'day 4', 'day 5', 'day 6', 'day 7', 'day 8', 'day 9', 'day 10'])
+        ax.tick_params(labelsize=10)
 
-    #plt.tight_layout()
+        fig.savefig('/home/raab/Desktop/traces_big.jpg', dpi=300)
+        plt.show()
 
     return fish_freqs
 
@@ -330,28 +284,28 @@ def main():
     #           path_start + '/data/kraken_link/2018-05-22-14:21',
     #           path_start + '/data/kraken_link/2018-05-29-13:35']
 
-    datafile=[path_start + '/data/kraken_link/2018-05-04-13_10',
-              path_start + '/data/kraken_link/2018-05-04-14:46',
-              path_start + '/data/kraken_link/2018-05-04-16:44',
-              path_start + '/data/kraken_link/2018-05-05-09:17',
-              path_start + '/data/kraken_link/2018-05-06-12:14',
-              path_start + '/data/kraken_link/2018-05-06-22:04',
-              path_start + '/data/kraken_link/2018-05-07-08:55',
-              path_start + '/data/kraken_link/2018-05-07-12:06',
-              path_start + '/data/kraken_link/2018-05-07-16:14',
-              path_start + '/data/kraken_link/2018-05-08-10:20',
-              path_start + '/data/kraken_link/2018-05-08-17:50',
-              path_start + '/data/kraken_link/2018-05-09-09:24',
-              path_start + '/data/kraken_link/2018-05-09-16:53',
-              path_start + '/data/kraken_link/2018-05-10-09:30',
-              path_start + '/data/kraken_link/2018-05-10-20:04',
-              path_start + '/data/kraken_link/2018-05-11-09:49',
-              path_start + '/data/kraken_link/2018-05-11-20:21',
-              path_start + '/data/kraken_link/2018-05-12-09:43',
-              path_start + '/data/kraken_link/2018-05-12-19:25',
-              path_start + '/data/kraken_link/2018-05-13-09:49',
-              path_start + '/data/kraken_link/2018-05-13-20:08',
-              path_start + '/data/kraken_link/2018-05-14-10:04']
+    datafile=[path_start + '/data/2018_habitat_preference/2018-05-04-13_10',
+              path_start + '/data/2018_habitat_preference/2018-05-04-14:46',
+              path_start + '/data/2018_habitat_preference/2018-05-04-16:44',
+              path_start + '/data/2018_habitat_preference/2018-05-05-09:17',
+              path_start + '/data/2018_habitat_preference/2018-05-06-12:14',
+              path_start + '/data/2018_habitat_preference/2018-05-06-22:04',
+              path_start + '/data/2018_habitat_preference/2018-05-07-08:55',
+              path_start + '/data/2018_habitat_preference/2018-05-07-12:06',
+              path_start + '/data/2018_habitat_preference/2018-05-07-16:14',
+              path_start + '/data/2018_habitat_preference/2018-05-08-10:20',
+              path_start + '/data/2018_habitat_preference/2018-05-08-17:50',
+              path_start + '/data/2018_habitat_preference/2018-05-09-09:24',
+              path_start + '/data/2018_habitat_preference/2018-05-09-16:53',
+              path_start + '/data/2018_habitat_preference/2018-05-10-09:30',
+              path_start + '/data/2018_habitat_preference/2018-05-10-20:04',
+              path_start + '/data/2018_habitat_preference/2018-05-11-09:49',
+              path_start + '/data/2018_habitat_preference/2018-05-11-20:21',
+              path_start + '/data/2018_habitat_preference/2018-05-12-09:43',
+              path_start + '/data/2018_habitat_preference/2018-05-12-19:25',
+              path_start + '/data/2018_habitat_preference/2018-05-13-09:49',
+              path_start + '/data/2018_habitat_preference/2018-05-13-20:08',
+              path_start + '/data/2018_habitat_preference/2018-05-14-10:04']
 
     # shift = [0, 5760, 12840, 72420, 169440, 204840, 243900, 255360, 270240, 335400, 362400, 418440, 445380, 505200, 543240, 592740, 630660, 678780, 713700, 765540, 802680, 852840, 1559460, 2161500]
     shift = [0, 5760, 12840, 72420, 169440, 204840, 243900, 255360, 270240, 335400, 362400, 418440, 445380, 505200, 543240, 592740, 630660, 678780, 713700, 765540, 802680, 852840]
@@ -1370,7 +1324,7 @@ def main():
     fig.text(1.375/18, 7.75/10, 'EOD frequency [Hz]', ha='center', va='center', fontsize=fs, rotation =90)
 
     # ax0.set_ylabel('EOD frequency [Hz]', fontsize=fs)
-    fish_freqs = create_plot(datafile, shift, fish_nr_in_rec, colors, ax = ax0)
+    fish_freqs = create_plot(datafile, shift, fish_nr_in_rec, colors, dn_borders, last_time=times[-1], ax = ax0)
     for ns, ne in zip(dn_borders[::2], dn_borders[1::2]):
         ax0.fill_between([ns, ne], [650, 650], [970, 970], color='#888888')
     ax0.set_yticks([700, 800, 900])
