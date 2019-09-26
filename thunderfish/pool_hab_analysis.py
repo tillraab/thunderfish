@@ -2131,17 +2131,21 @@ def main():
 
     fig.savefig('/home/raab/paper_create/2019raab_habitats/transitions.jpg', dpi=300)
 
-    plot_for_Jan = False
+    plot_for_Jan = True
     if plot_for_Jan:
         fig = plt.figure(figsize=(20/2.54, 12/2.54), facecolor='white')
-        ax = fig.add_axes([.1, .15, .85, .8])
-        #
-        # ax = fig.add_axes([.1, .15, .35, .8])
-        # ax1 = fig.add_axes([.55, .6, .4, .35])
-        # ax2 = fig.add_axes([.55, .15, .4, .35])
+        # ax = fig.add_axes([.1, .15, .85, .8])
+
+        ax = fig.add_axes([.1, .15, .35, .8])
+        ax1 = fig.add_axes([.55, .6, .4, .35])
+        ax2 = fig.add_axes([.55, .15, .4, .35])
 
         col = colors[:7]
         col.append('k')
+
+        male_day_dada = []
+        male_night_dada = []
+
         for fish_nr in range(len(dn_hab_changes))[:6]:
             m = 'o'
             if fish_nr == 0:
@@ -2156,6 +2160,14 @@ def main():
                                xerr = np.std(dn_hab_changes[fish_nr][1::2][(dn_hab_changes[fish_nr][1::2] != 0) & (dn_hab_changes[fish_nr][::2] != 0)]),
                                yerr = np.std(dn_hab_changes[fish_nr][::2][(dn_hab_changes[fish_nr][1::2] != 0) & (dn_hab_changes[fish_nr][::2] != 0)]),
                                color='dodgerblue', marker=m, markersize=5)
+
+            male_day_dada.append(np.mean(dn_hab_changes[fish_nr][1::2][(dn_hab_changes[fish_nr][1::2] != 0) & (dn_hab_changes[fish_nr][::2] != 0)]))
+            male_night_dada.append(np.mean(dn_hab_changes[fish_nr][::2][(dn_hab_changes[fish_nr][1::2] != 0) & (dn_hab_changes[fish_nr][::2] != 0)]))
+        male_slope, male_intercept, _, _, _ = scp.linregress(male_day_dada, male_night_dada)
+        ax.plot([0, 3000], np.array([0, 3000])*male_slope + male_intercept, color='dodgerblue', lw = 2, alpha = 0.6)
+        #
+        female_day_dada = []
+        female_night_dada = []
         for enu, fish_nr in enumerate(range(len(dn_hab_changes))[6:]):
             m = 'o'
             if enu == 0:
@@ -2170,6 +2182,11 @@ def main():
                                xerr = np.std(dn_hab_changes[fish_nr][1::2][(dn_hab_changes[fish_nr][1::2] != 0) & (dn_hab_changes[fish_nr][::2] != 0)]),
                                yerr = np.std(dn_hab_changes[fish_nr][::2][(dn_hab_changes[fish_nr][1::2] != 0) & (dn_hab_changes[fish_nr][::2] != 0)]),
                                color = 'deeppink', marker=m, markersize=5)
+            female_day_dada.append(np.mean(dn_hab_changes[fish_nr][1::2][(dn_hab_changes[fish_nr][1::2] != 0) & (dn_hab_changes[fish_nr][::2] != 0)]))
+            female_night_dada.append(np.mean(dn_hab_changes[fish_nr][::2][(dn_hab_changes[fish_nr][1::2] != 0) & (dn_hab_changes[fish_nr][::2] != 0)]))
+        female_slope, female_intercept, _, _, _ = scp.linregress(female_day_dada, female_night_dada)
+        ax.plot([0, 3500], np.array([0, 3500]) * female_slope + female_intercept, color='deeppink', lw=2, alpha =0.6)
+
         ax.plot([0, 6000], [0, 6000], 'k-', lw=1)
 
         ax.set_xlabel('day transitions [1000/12h]', fontsize=fs)
@@ -2192,7 +2209,7 @@ def main():
                 ax1.errorbar(fish_freqs[fish_nr],
                                np.mean(dn_hab_changes[fish_nr][::2][(dn_hab_changes[fish_nr][1::2] != 0) & (dn_hab_changes[fish_nr][::2] != 0)]),
                                yerr = np.std(dn_hab_changes[fish_nr][::2][(dn_hab_changes[fish_nr][1::2] != 0) & (dn_hab_changes[fish_nr][::2] != 0)]),
-                               color='dodgerblue', marker=m, markersize=5, label=u'\u2642')
+                               color='dodgerblue', marker=m, markersize=5, label='male')
             else:
                 ax1.errorbar(fish_freqs[fish_nr],
                                np.mean(dn_hab_changes[fish_nr][::2][(dn_hab_changes[fish_nr][1::2] != 0) & (dn_hab_changes[fish_nr][::2] != 0)]),
