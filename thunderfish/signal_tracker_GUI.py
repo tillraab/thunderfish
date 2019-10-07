@@ -21,7 +21,7 @@ from PyQt5.QtWidgets import *
 from PyQt5.QtGui import *
 from PyQt5 import QtCore
 from PyQt5.QtCore import *
-from matplotlib.backends.backend_qt4agg import FigureCanvasQTAgg as FigureCanvas
+from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 
 
 from matplotlib.widgets import RectangleSelector, EllipseSelector
@@ -135,37 +135,83 @@ class AnalysisDialog(QMainWindow):
 
         self.Overlap = QLineEdit(str(self.overlap_frac), self.central_widget)
         self.gridLayout.addWidget(self.Overlap, 4, 0)
-        overlap = QLabel('frequency resolution [Hz]')
+        overlap = QLabel('overlap fraction')
         self.gridLayout.addWidget(overlap, 4, 1)
+
 
         self.NfftPerPsd = QLineEdit(str(self.nffts_per_psd), self.central_widget)
         self.gridLayout.addWidget(self.NfftPerPsd, 5, 0)
         overlap = QLabel('nffts per PSD [n]')
         self.gridLayout.addWidget(overlap, 5, 1)
 
-        space = QLabel('', self)
-        self.gridLayout.addWidget(space, 6, 0)
+        if self.samplerate:
+            self.real_nfft = QLabel('%.0f' % next_power_of_two(self.samplerate / self.fresolution))
+            self.temp_res = QLabel('%.3f' % (next_power_of_two(self.samplerate / self.fresolution) * (1. - self.overlap_frac)))
+            print('%.3f' % (next_power_of_two(self.samplerate / self.fresolution) * (1. - self.overlap_frac) / self.samplerate))
+        else:
+            self.real_nfft = QLabel('~')
+            self.temp_res = QLabel('~')
+
+        self.real_nfftL = QLabel('real nfft [n]')
+        self.temp_resL = QLabel('temp. resolution [s]')
+
+        self.gridLayout.addWidget(self.real_nfft, 6, 1)
+        self.gridLayout.addWidget(self.real_nfftL, 6, 2)
+
+        self.gridLayout.addWidget(self.temp_res, 7, 1)
+        self.gridLayout.addWidget(self.temp_resL, 7, 2)
+
 
         Run = QPushButton('&Run', self.central_widget)
         Run.clicked.connect(self.snippet_spectrogram)
-        self.gridLayout.addWidget(Run, 7, 0)
+        self.gridLayout.addWidget(Run, 8, 0)
 
         Apply = QPushButton('&Apply', self.central_widget)
         Apply.clicked.connect(self.apply_settings)
-        self.gridLayout.addWidget(Apply, 7, 1)
+        self.gridLayout.addWidget(Apply, 8, 1)
 
         Cancel = QPushButton('&Cancel', self.central_widget)
         Cancel.clicked.connect(self.close)
-        self.gridLayout.addWidget(Cancel, 7, 2)
+        self.gridLayout.addWidget(Cancel, 8, 2)
 
         # space = QLabel('', self)
         # self.gridLayout.addWidget(Cancel, 7, 0)
         # self.gridLayout.addWidget()
 
     def apply_settings(self):
+        # int(self.Grid.col_elecs.text())
+
+        #self.start_time = 0 * 60
+        self.start_time = float(self.StartTime.text()) * 60
+        #self.end_time = .1 * 60
+        self.end_time = float(self.EndTime.text()) * 60
+        #self.data = None
+        #self.samplerate = None
+        #self.channels = None
+        #self.channel_list = []
+        #self.data_snippet_sec = 15.
+        self.data_snippet_sec = float(self.SnippetSize.text())
+        self.data_snippet_idxs = int(self.data_snippet_sec * self.samplerate)
+        ##### int(data_snippet_secs * samplerate)
+        #self.data_snippet_idxs = None
+
+        #self.fresolution = 0.5
+        self.fresolution = float(self.FreqResolution.text())
+        #self.overlap_frac = 0.95
+        self.overlap_frac = float(self.Overlap.text())
+        #self.channel_list = None
+        #self.nffts_per_psd = 1
+        self.nffts_per_psd = int(self.NfftPerPsd.text())
+
+        if self.samplerate:
+            self.real_nfft.setText('%.0f' % next_power_of_two(self.samplerate / self.fresolution))
+            self.temp_res.setText('%.3f' % (next_power_of_two(self.samplerate / self.fresolution) * (1. - self.overlap_frac) / self.samplerate))
+
         print('read that input')
 
     def snippet_spectrogram(self):
+        self.apply_settings()
+
         start_idx = int(self.start_time * self.samplerate)
         if self.end_time < 0.0:
             end_time = len(self.data) / self.samplerate
@@ -280,6 +326,7 @@ class AnalysisDialog(QMainWindow):
                 break
         self.got_changed = True
         # print('done')
+
         self.close()
 
     def extract_fundamentals_and_signatures(self):
@@ -1085,41 +1132,6 @@ class MainWindow(QMainWindow):
 
 
     def open(self):
-        fd = QFileDialog()
-        if os.path.exists('/home/raab/data/'):
-            self.filename, ok = fd.getOpenFileName(self, 'Open File', '/home/raab/data/', 'Select Raw-File (*.raw)')
-        else:
-            self.filename, ok = fd.getOpenFileName(self, 'Open File', '/home/', 'Select Raw-File (*.raw)')
-
-        if ok:
-            self.Act_load.setEnabled(True)
-            self.load_button.setEnabled(True)
-
-            self.data = open_data(self.filename, -1, 60.0, 10.0)
-            self.AnalysisDial.data = self.data
-
-            self.samplerate= self.data.samplerate
-            self.AnalysisDial.samplerate= self.samplerate
-            self.AnalysisDial.data_snippet_idxs = int(self.AnalysisDial.data_snippet_sec * self.samplerate)
-
-            self.channels = self.data.channels
-            self.Grid.channels = self.data.channels
-            self.AnalysisDial.channels = self.data.channels
-            self.AnalysisDial.channel_list = np.arange(self.channels)
-
-
-            if os.path.exists(os.path.join(os.path.split(self.filename)[0], 'fishgrid.cfg')):
-
-                self.elecs_y, self.elecs_x = fishgrid_grids(self.filename)[0]
-                self.Grid.elecs_y, self.Grid.elecs_x = fishgrid_grids(self.filename)[0]
-
-                self.elecs_y_spacing, self.elecs_x_spacing = fishgrid_spacings(self.filename)[0]
-                self.Grid.elecs_y_spacing, self.Grid.elecs_x_spacing = fishgrid_spacings(self.filename)[0]
-
-                self.Grid.update_widgets()
-
-
-    def load(self):
         def get_datetime(folder):
             rec_year, rec_month, rec_day, rec_time = \
                 os.path.split(os.path.split(folder)[-1])[-1].split('-')
@@ -1137,9 +1149,51 @@ class MainWindow(QMainWindow):
 
             return rec_datetime
 
+        fd = QFileDialog()
+        if os.path.exists('/home/raab/data/'):
+            self.filename, ok = fd.getOpenFileName(self, 'Open File', '/home/raab/data/', 'Select Raw-File (*.raw)')
+        else:
+            self.filename, ok = fd.getOpenFileName(self, 'Open File', '/home/', 'Select Raw-File (*.raw)')
+
+        if ok:
+            self.folder = os.path.split(self.filename)[0]
+            self.rec_datetime = get_datetime(self.folder)
+            self.Plot.rec_datetime = self.rec_datetime
+
+            self.Act_load.setEnabled(True)
+            self.load_button.setEnabled(True)
+
+            self.data = open_data(self.filename, -1, 60.0, 10.0)
+
+            self.AnalysisDial.data = self.data
+
+            self.samplerate= self.data.samplerate
+            self.AnalysisDial.samplerate= self.samplerate
+            self.AnalysisDial.data_snippet_idxs = int(self.AnalysisDial.data_snippet_sec * self.samplerate)
+
+            self.channels = self.data.channels
+            self.Grid.channels = self.data.channels
+            self.AnalysisDial.channels = self.data.channels
+            self.AnalysisDial.channel_list = np.arange(self.channels)
+
+            # print(self.rec_datetime)
+
+            if os.path.exists(os.path.join(os.path.split(self.filename)[0], 'fishgrid.cfg')):
+
+                self.elecs_y, self.elecs_x = fishgrid_grids(self.filename)[0]
+                self.Grid.elecs_y, self.Grid.elecs_x = fishgrid_grids(self.filename)[0]
+
+                self.elecs_y_spacing, self.elecs_x_spacing = fishgrid_spacings(self.filename)[0]
+                self.Grid.elecs_y_spacing, self.Grid.elecs_x_spacing = fishgrid_spacings(self.filename)[0]
+
+                self.Grid.update_widgets()
+
+
+    def load(self):
+
         # embed()
         # quit()
-        self.folder = os.path.split(self.filename)[0]
+        #self.folder = os.path.split(self.filename)[0]
         if os.path.exists(os.path.join(self.folder, 'id_tag.npy')):
             self.id_tag = np.load(os.path.join(self.folder, 'id_tag.npy'))
 
@@ -1152,7 +1206,7 @@ class MainWindow(QMainWindow):
             self.spectra = np.load(os.path.join(self.folder, 'spec.npy'))
             self.start_time, self.end_time = np.load(os.path.join(self.folder, 'meta.npy'))
 
-            self.rec_datetime = get_datetime(self.folder)
+            # self.rec_datetime = get_datetime(self.folder)
             # ToDo dirty
 
             if self.Plot.spec_img_handle:
@@ -1401,7 +1455,39 @@ class MainWindow(QMainWindow):
             self.Plot.ax.set_ylim([0, 2000])
             self.Plot.canvas.draw()
 
+            y_lim = self.Plot.ax.get_ylim()
+            x_lim = self.Plot.ax.get_xlim()
+            self.Plot.xlim = x_lim
+            self.Plot.ylim = y_lim
+
+            self.Plot.init_xlim = x_lim
+            self.Plot.init_ylim = y_lim
+
+            self.times = self.AnalysisDial.times
+            self.Plot.times = self.AnalysisDial.times
+
             self.AnalysisDial.got_changed = False
+
+            self.Act_save.setEnabled(True)
+            self.Act_interactive_sel.setEnabled(True)
+            self.Act_interactive_con.setEnabled(True)
+            self.Act_interactive_GrCon.setEnabled(True)
+            self.Act_interactive_del.setEnabled(True)
+            self.Act_interactive_GrDel.setEnabled(True)
+            self.Act_interactive_reset.setEnabled(True)
+            self.Act_interactive_cut.setEnabled(True)
+            self.Act_interactive_AutoSort.setEnabled(True)
+            self.Act_interactive_ManualSort.setEnabled(True)
+            self.Act_interactive_zoom_out.setEnabled(True)
+            self.Act_interactive_zoom_in.setEnabled(True)
+            self.Act_interactive_zoom_home.setEnabled(True)
+            self.Act_interactive_zoom.setEnabled(True)
+            self.Act_fine_spec.setEnabled(True)
+            self.Act_norm_spec.setEnabled(True)
+            self.Act_arrowkeys.setEnabled(True)
+            self.Act_arrowkeys.setChecked(True)
+
+
 
 
 def main():
