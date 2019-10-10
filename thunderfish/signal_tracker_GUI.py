@@ -1102,6 +1102,8 @@ class MainWindow(QMainWindow):
         self.cb.addItem('None')
         self.cb.currentIndexChanged.connect(self.selectionchange)
 
+        # ToDo: add shortcut: QShortcut self.cb.setCurrentIndex ...
+
         self.disp_analysis_button = QPushButton('Display analysis', self.central_widget)
         self.disp_analysis_button.clicked.connect(self.show_updates)
 
@@ -1132,13 +1134,10 @@ class MainWindow(QMainWindow):
             self.Plot.spec_img_handle.remove()
         self.Plot.spec_img_handle = None
 
-
         vmax = -50
-        vmin = -90
-        # vmin, _ = hist_threshold(np.hstack(self.AnalysisDial.tmp_spectra_SCH))
+        vmin = -80
 
         if i == 0:
-
             if hasattr(self.AnalysisDial.tmp_spectra, '__len__'):
                 self.Plot.spec_img_handle = self.Plot.ax.imshow(decibel(self.AnalysisDial.tmp_spectra)[::-1],
                                                                 extent=[self.AnalysisDial.SpecSettings.start_time,
@@ -1391,6 +1390,14 @@ class MainWindow(QMainWindow):
         if e.key() == Qt.Key_Return:
             self.execute()
             # print('enter')
+        if e.modifiers() & Qt.ShiftModifier and e.key == Qt.Key_C:
+            c_idx = self.cb.currentIndex()
+            self.cb.setCurrentIndex(c_idx + 1)
+
+        if e.key() == Qt.Key_C:
+            c_idx = self.cb.currentIndex()
+            self.cb.setCurrentIndex(c_idx - 1)
+
 
 
     def buttonpress(self, e):
@@ -1537,10 +1544,11 @@ class MainWindow(QMainWindow):
                 self.Plot.spec_img_handle.remove()
             self.Plot.spec_img_handle = self.Plot.ax.imshow(decibel(self.spectra)[::-1],
                                                   extent=[self.start_time, self.end_time, 0, 2000],
-                                                  aspect='auto', alpha=0.7, cmap='jet', interpolation='gaussian')
+                                                  aspect='auto',vmin = -80, vmax = -50, alpha=0.7, cmap='jet', interpolation='gaussian')
             self.Plot.ax.set_xlabel('time', fontsize=12)
             self.Plot.ax.set_ylabel('frequency [Hz]', fontsize=12)
             self.Plot.ax.set_xlim(self.start_time, self.end_time)
+            self.Plot.ax.set_ylim(400, 1000)
 
             self.Plot.plot_traces(self.ident_v, self.times, self.idx_v, self.fund_v, task='init')
 
@@ -1783,11 +1791,11 @@ class MainWindow(QMainWindow):
                 self.Plot.spec_img_handle.remove()
             self.Plot.spec_img_handle = self.Plot.ax.imshow(decibel(self.AnalysisDial.tmp_spectra)[::-1],
                                                        extent=[self.AnalysisDial.SpecSettings.start_time, self.AnalysisDial.SpecSettings.end_time, 0, 2000],
-                                                       aspect='auto', alpha=0.7, cmap='jet',
+                                                       aspect='auto', alpha=0.7, cmap='jet', vmin=-80, vmax=-50,
                                                        interpolation='gaussian')
 
-            self.Plot.ax.set_xlim([self.AnalysisDial.SpecSettings.start_time, self.AnalysisDial.SpecSettings.end_time])
-            self.Plot.ax.set_ylim([0, 2000])
+            self.Plot.ax.set_xlim(self.AnalysisDial.SpecSettings.start_time, self.AnalysisDial.SpecSettings.end_time)
+            self.Plot.ax.set_ylim(400, 1000)
             self.Plot.canvas.draw()
 
             y_lim = self.Plot.ax.get_ylim()
