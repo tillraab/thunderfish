@@ -64,8 +64,10 @@ class SettingsHarmonicGroup(QMainWindow):
 
         self.verbose=0
         self.low_threshold=0.0
+        self.low_threshold_G = 0.0
         self.low_thresh_factor=6.0
         self.high_threshold=0.0
+        self.high_threshold_G=0.0
         self.high_thresh_factor=10.0
         self.freq_tol_fac=1.0
         self.mains_freq=60.0
@@ -195,9 +197,7 @@ class SettingsHarmonicGroup(QMainWindow):
         self.cfg = {}
 
         self.cfg.update({'verbose': self.verbose})
-        self.cfg.update({'low_threshold': self.low_threshold})
         self.cfg.update({'low_thresh_factor': self.low_thresh_factor})
-        self.cfg.update({'high_threshold': self.high_threshold})
         self.cfg.update({'high_thresh_factor': self.high_thresh_factor})
         self.cfg.update({'freq_tol_fac': self.freq_tol_fac})
         self.cfg.update({'mains_freq': self.mains_freq})
@@ -343,6 +343,8 @@ class AnalysisDialog(QMainWindow):
         self.channel_list = []
         self.data = None
 
+        self.fundamentals_SCH = []
+        self.signatures_SCH = []
         self.fundamentals = []
         self.signatures = []
         self.times = []
@@ -430,23 +432,30 @@ class AnalysisDialog(QMainWindow):
         HGsettings_B.clicked.connect(self.MHGsettings)
         self.gridLayout.addWidget(HGsettings_B, 0, 0)
 
+        self.CBgroup_analysis = QCheckBox('Multi-Channel', self.central_widget)
+        self.gridLayout.addWidget(self.CBgroup_analysis, 1, 0)
+
+        self.CB_SCH_analysis = QCheckBox('Single-Channel', self.central_widget)
+        self.gridLayout.addWidget(self.CB_SCH_analysis, 2, 0)
+        self.CB_SCH_analysis.setChecked(True)
+
         SpecSettings_B = QPushButton('&Spectrogram Settings', self.central_widget)
         SpecSettings_B.clicked.connect(self.MSpecSettings)
         self.gridLayout.addWidget(SpecSettings_B, 0, 1)
 
         space = QLabel('', self.central_widget)
-        self.gridLayout.addWidget(space, 1, 0)
+        self.gridLayout.addWidget(space, 3, 0)
 
         self.progress = QProgressBar(self)
-        self.gridLayout.addWidget(self.progress, 2, 0, 1, 3)
+        self.gridLayout.addWidget(self.progress, 4, 0, 1, 3)
 
         Run = QPushButton('&Run', self.central_widget)
         Run.clicked.connect(self.snippet_spectrogram)
-        self.gridLayout.addWidget(Run, 3, 0)
+        self.gridLayout.addWidget(Run, 5, 0)
 
         Cancel = QPushButton('&Cancel', self.central_widget)
         Cancel.clicked.connect(self.close)
-        self.gridLayout.addWidget(Cancel, 3, 2)
+        self.gridLayout.addWidget(Cancel, 5, 2)
 
     def MHGsettings(self):
         self.HGSettings.show()
@@ -474,7 +483,6 @@ class AnalysisDialog(QMainWindow):
 
         while start_idx <= end_idx:
             self.progress.setValue((start_idx - p0) / (end_idx - p0) * 100)
-
 
             if start_idx >= end_idx - self.SpecSettings.data_snippet_idxs:
                 last_run = True
@@ -505,11 +513,10 @@ class AnalysisDialog(QMainWindow):
             comp_min_freq = 0
             create_plotable_spectrogram = True
 
-            plot_freqs = self.spec_freqs[self.spec_freqs < comp_max_freq]
-            plot_spectra = np.sum(self.spectra, axis=0)[self.spec_freqs < comp_max_freq]
-
             # print('check 2')
             if create_plotable_spectrogram:
+                plot_freqs = self.spec_freqs[self.spec_freqs < comp_max_freq]
+                plot_spectra = np.sum(self.spectra, axis=0)[self.spec_freqs < comp_max_freq]
                 # if not checked_xy_borders:
                 if not get_spec_plot_matrix:
                     fig_xspan = 20.
@@ -566,11 +573,25 @@ class AnalysisDialog(QMainWindow):
             ####
             # print('check 3')
 
-            self.power = [np.array([]) for i in range(len(self.spec_times))]
+            if self.CBgroup_analysis.isChecked():
+                self.power = [np.array([]) for i in range(len(self.spec_times))]
+                for t in range(len(self.spec_times)):
+                    self.power[t] = np.mean(self.comb_spectra[:, t:t + 1], axis=1)
+                self.extract_fundamentals_and_signatures()
 
-            for t in range(len(self.spec_times)):
-                self.power[t] = np.mean(self.comb_spectra[:, t:t + 1], axis=1)
-            self.extract_fundamentals_and_signatures()
+            if self.CB_SCH_analysis.isChecked():
+                for self.ch in self.channel_list:
+                    self.fundamentals_SCH.append([])
+                    self.signatures_SCH.append([])
+                    # ToDo: error here !!!
+                    self.power = [np.array([]) for i in range(len(self.spec_times))]
+
+                    for t in range(len(self.spec_times)):
+                        self.power[t] = np.mean(self.spectra[self.ch][:, t:t + 1], axis=1)
+                        # self.power[t] = np.mean(self.comb_spectra[:, t:t + 1], axis=1)
+                    self.extract_fundamentals_and_signatures(channel = self.ch)
+
+            ##########
 
             non_overlapping_idx = (1 - self.SpecSettings.overlap_frac) * nfft
             start_idx += int((len(self.spec_times) - self.SpecSettings.nffts_per_psd + 1) * non_overlapping_idx)
@@ -586,40 +607,62 @@ class AnalysisDialog(QMainWindow):
 
         self.close()
 
-    def extract_fundamentals_and_signatures(self):
+    def extract_fundamentals_and_signatures(self, channel = None):
         core_count = multiprocessing.cpu_count()
         pool = multiprocessing.Pool(core_count // 2)
 
         # ToDo the kwarg problem ....
 
-        if True:
-            #psd_freqs
-            #psd
-            self.verbose=0
-            #check_freqs=[]
-            self.low_threshold=0.0
-            self.high_threshold=0.0
-            #thresh_bins=100
-            self.low_thresh_factor=6.0
-            self.high_thresh_factor=10.0
-            self.freq_tol_fac=1.0
-            self.mains_freq=60.0
-            self.mains_freq_tol=1.0
-            #min_freq=0.0
-            #max_freq=2000.0
-            self.max_divisor=4
-            self.min_group_size=4
-            self.max_rel_power_weight=2.0
-            self.max_rel_power=0.0
-            #max_harmonics=0
-            #max_groups=0
+        # if True:
+        #     #psd_freqs
+        #     #psd
+        #     self.verbose=0
+        #     #check_freqs=[]
+        #     self.low_threshold=0.0
+        #     self.high_threshold=0.0
+        #     #thresh_bins=100
+        #     self.low_thresh_factor=6.0
+        #     self.high_thresh_factor=10.0
+        #     self.freq_tol_fac=1.0
+        #     self.mains_freq=60.0
+        #     self.mains_freq_tol=1.0
+        #     #min_freq=0.0
+        #     #max_freq=2000.0
+        #     self.max_divisor=4
+        #     self.min_group_size=4
+        #     self.max_rel_power_weight=2.0
+        #     self.max_rel_power=0.0
+        #     #max_harmonics=0
+        #     #max_groups=0
 
-        func = partial(harmonic_groups, self.spec_freqs, **self.HGSettings.cfg)
+        if channel == None:
+            func = partial(harmonic_groups, self.spec_freqs, low_threshold = self.HGSettings.low_threshold_G,
+                           high_threshold = self.HGSettings.high_threshold_G, **self.HGSettings.cfg)
+        else:
+            func = partial(harmonic_groups, self.spec_freqs, low_threshold = self.HGSettings.low_threshold,
+                           high_threshold = self.HGSettings.high_threshold, **self.HGSettings.cfg)
+
         a = pool.map(func, self.power)
+
+        if channel == None:
+            if self.HGSettings.low_threshold_G <= 0 or self.HGSettings.high_threshold_G <= 0:
+                self.HGSettings.low_threshold_G = a[0][5]
+                self.HGSettings.high_threshold_G = a[0][6]
+        else:
+            if self.HGSettings.low_threshold <= 0 or self.HGSettings.high_threshold <= 0:
+                self.HGSettings.low_threshold = a[0][5]
+                self.HGSettings.high_threshold = a[0][6]
+
+
         log_spectra = decibel(np.array(self.spectra))
+
+
         for p in range(len(self.power)):
             tmp_fundamentals = fundamental_freqs(a[p][0])
             self.fundamentals.append(tmp_fundamentals)
+
+            if channel != None:
+                self.fundamentals_SCH[channel].append(tmp_fundamentals)
 
             if len(tmp_fundamentals) >= 1:
                 f_idx = np.array([np.argmin(np.abs(self.spec_freqs - f)) for f in tmp_fundamentals])
@@ -628,6 +671,9 @@ class AnalysisDialog(QMainWindow):
                 tmp_signatures = np.array([])
 
             self.signatures.append(tmp_signatures)
+            if channel != None:
+                self.signatures_SCH[channel].append(tmp_signatures)
+
         pool.terminate()
 
 class GridDialog(QMainWindow):
@@ -795,15 +841,20 @@ class PlotWidget():
         self.rec_datetime = None
 
         self.fundamentals = None
+        self.fundamentals_SCH = None
         self.times = None
 
-    def plot_fundamentals(self):
+    def plot_fundamentals(self, ch = None):
         flat_fundamentals = []
         flat_t = []
-        for f, t in zip(self.fundamentals, self.times):
-            flat_fundamentals.extend(f)
-            flat_t.extend(np.ones(len(f)) * t)
-
+        if ch == None:
+            for f, t in zip(self.fundamentals, self.times):
+                flat_fundamentals.extend(f)
+                flat_t.extend(np.ones(len(f)) * t)
+        else:
+            for f, t in zip(self.fundamentals_SCH[ch], self.times):
+                flat_fundamentals.extend(f)
+                flat_t.extend(np.ones(len(f)) * t)
         if self.fundamentals_handle:
             self.fundamentals_handle.remove()
         self.fundamentals_handle = None
@@ -1089,18 +1140,25 @@ class MainWindow(QMainWindow):
 
         self.central_widget = QWidget(self)
 
-        self.open_button = QPushButton('Open', self.central_widget)
-        self.open_button.clicked.connect(self.open)
-        self.load_button = QPushButton('Load', self.central_widget)
-        self.load_button.clicked.connect(self.load)
-        self.load_button.setEnabled(False)
+        # self.open_button = QPushButton('Open', self.central_widget)
+        # self.open_button.clicked.connect(self.open)
+        # self.load_button = QPushButton('Load', self.central_widget)
+        # self.load_button.clicked.connect(self.load)
+        # self.load_button.setEnabled(False)
 
         self.cb = QComboBox()
-        self.cb.addItem('all channels')
-        for i in range(16):
+        for i in np.arange(-1, 16):
             self.cb.addItem('Channel %.0f' % i)
-        self.cb.addItem('None')
-        self.cb.currentIndexChanged.connect(self.selectionchange)
+        self.cb.currentIndexChanged.connect(self.channel_change)
+
+        self.cb_SCH_MCH = QComboBox()
+        self.cb_SCH_MCH.addItems(['single Ch.', 'multi Ch.'])
+        self.cb_SCH_MCH.currentIndexChanged.connect(self.SCH_MCH_change)
+
+        self.cb_trace_spec = QComboBox()
+        self.cb_trace_spec.addItems(['Trace', 'Spectrum'])
+        self.cb_trace_spec.currentIndexChanged.connect(self.trace_spec_change)
+
 
         # ToDo: add shortcut: QShortcut self.cb.setCurrentIndex ...
 
@@ -1111,10 +1169,12 @@ class MainWindow(QMainWindow):
 
         # self.gridLayout.addWidget(self.canvas, 0, 0, 4, 5)
         self.gridLayout.addWidget(self.Plot.canvas, 0, 0, 4, 5)
-        self.gridLayout.addWidget(self.open_button, 4, 1)
-        self.gridLayout.addWidget(self.disp_analysis_button, 4, 2)
-        self.gridLayout.addWidget(self.load_button, 4, 3)
+        # self.gridLayout.addWidget(self.open_button, 4, 1)
+        self.gridLayout.addWidget(self.disp_analysis_button, 4, 0)
+        # self.gridLayout.addWidget(self.load_button, 4, 3)
         self.gridLayout.addWidget(self.cb, 4, 4)
+        self.gridLayout.addWidget(self.cb_SCH_MCH, 4, 3)
+        self.gridLayout.addWidget(self.cb_trace_spec, 4, 2)
         # self.setLayout(v)
 
         # self.show()  # show the window
@@ -1129,31 +1189,55 @@ class MainWindow(QMainWindow):
         # self.figure.canvas.draw()
         self.Plot.canvas.draw()
 
-    def selectionchange(self, i):
-        if self.Plot.spec_img_handle:
-            self.Plot.spec_img_handle.remove()
-        self.Plot.spec_img_handle = None
+    def channel_change(self, i):
+        # self.cb
+        # self.cb_trace_spec
+        # self.cb_SCH_MCH
+        if self.cb_trace_spec.currentIndex() == 1: # spec
+            if self.Plot.spec_img_handle:
+                self.Plot.spec_img_handle.remove()
+            self.Plot.spec_img_handle = None
 
-        vmax = -50
-        vmin = -80
+            vmax = -50
+            vmin = -100
+            dt = self.Plot.times[1] - self.Plot.times[0]
 
-        if i == 0:
-            if hasattr(self.AnalysisDial.tmp_spectra, '__len__'):
-                self.Plot.spec_img_handle = self.Plot.ax.imshow(decibel(self.AnalysisDial.tmp_spectra)[::-1],
-                                                                extent=[self.AnalysisDial.SpecSettings.start_time,
-                                                                        self.AnalysisDial.SpecSettings.end_time, 0, 2000],
-                                                                aspect='auto', alpha=0.7, cmap='jet', vmin=vmin, vmax=vmax,
-                                                                interpolation='gaussian')
-        elif i == self.cb.count()-1:
-            pass
-        else:
-            if hasattr(self.AnalysisDial.tmp_spectra_SCH, '__len__'):
-                self.Plot.spec_img_handle = self.Plot.ax.imshow(decibel(self.AnalysisDial.tmp_spectra_SCH[i-1])[::-1],
-                                                                extent=[self.AnalysisDial.SpecSettings.start_time,
-                                                                        self.AnalysisDial.SpecSettings.end_time, 0, 2000],
-                                                                aspect='auto', alpha=0.7, cmap='jet', vmin=vmin, vmax=vmax,
-                                                                interpolation='gaussian')
-        self.Plot.canvas.draw()
+            if i == 0:
+                if hasattr(self.AnalysisDial.tmp_spectra, '__len__'):
+                    self.Plot.spec_img_handle = self.Plot.ax.imshow(decibel(self.AnalysisDial.tmp_spectra)[::-1],
+                                                                    extent=[self.Plot.times[0], self.Plot.times[-1] + dt, 0, 2000],
+                                                                    aspect='auto', alpha=0.7, cmap='jet', vmin=vmin, vmax=vmax,
+                                                                    interpolation='gaussian')
+                if self.Plot.fundamentals != []:
+                    self.Plot.plot_fundamentals()
+            elif i == self.cb.count()-1:
+                pass
+            else:
+                if hasattr(self.AnalysisDial.tmp_spectra_SCH, '__len__'):
+
+                    self.Plot.spec_img_handle = self.Plot.ax.imshow(decibel(self.AnalysisDial.tmp_spectra_SCH[i - 1])[::-1],
+                                                                    extent=[self.Plot.times[0], self.Plot.times[-1] + dt, 0, 2000],
+                                                                    aspect='auto', alpha=0.7, cmap='jet', vmin=vmin, vmax=vmax,
+                                                                    interpolation='gaussian')
+                if self.Plot.fundamentals_SCH != []:
+                    self.Plot.plot_fundamentals(ch = i - 1)
+                    # self.Plot.plot_fundamentals(ch = self.cb.currentIndex() - 1)
+
+            self.Plot.canvas.draw()
+
+    def SCH_MCH_change(self, i):
+        if i == 0: # single ch
+            self.cb.show()
+        elif i == 1: # multi ch
+            self.cb.close()
+
+    def trace_spec_change(self, i):
+        if i == 0: # trace
+            self.cb_SCH_MCH.close()
+            print('trace')
+        elif i == 1: # spec
+            self.cb_SCH_MCH.show()
+            print('spec')
 
     def init_ToolBar(self):
         toolbar = self.addToolBar('TB')  # toolbar needs QMainWindow ?!
@@ -1492,7 +1576,7 @@ class MainWindow(QMainWindow):
             self.Plot.rec_datetime = self.rec_datetime
 
             self.Act_load.setEnabled(True)
-            self.load_button.setEnabled(True)
+            # self.load_button.setEnabled(True)
 
             self.data = open_data(self.filename, -1, 60.0, 10.0)
 
@@ -1543,8 +1627,8 @@ class MainWindow(QMainWindow):
             if self.Plot.spec_img_handle:
                 self.Plot.spec_img_handle.remove()
             self.Plot.spec_img_handle = self.Plot.ax.imshow(decibel(self.spectra)[::-1],
-                                                  extent=[self.start_time, self.end_time, 0, 2000],
-                                                  aspect='auto',vmin = -80, vmax = -50, alpha=0.7, cmap='jet', interpolation='gaussian')
+                                                  extent=[self.times[0], self.times[-1] + (self.times[1] - self.times[0]), 0, 2000],
+                                                  aspect='auto',vmin = -100, vmax = -50, alpha=0.7, cmap='jet', interpolation='gaussian')
             self.Plot.ax.set_xlabel('time', fontsize=12)
             self.Plot.ax.set_ylabel('frequency [Hz]', fontsize=12)
             self.Plot.ax.set_xlim(self.start_time, self.end_time)
@@ -1575,8 +1659,8 @@ class MainWindow(QMainWindow):
             self.Act_arrowkeys.setEnabled(True)
             self.Act_arrowkeys.setChecked(True)
 
-            self.open_button.close()
-            self.load_button.close()
+            # self.open_button.close()
+            # self.load_button.close()
 
     def Mzoom_in(self):
         self.Plot.zoom_in()
@@ -1598,6 +1682,7 @@ class MainWindow(QMainWindow):
         self.Plot.figure.canvas.draw()
 
     def Mplot_fundamentals(self):
+        self.Plot.fundamentals_SCH = self.AnalysisDial.fundamentals_SCH
         self.Plot.fundamentals = self.AnalysisDial.fundamentals
         self.Plot.times = self.AnalysisDial.times
         self.Plot.plot_fundamentals()
@@ -1787,14 +1872,26 @@ class MainWindow(QMainWindow):
 
     def show_updates(self):
         if self.AnalysisDial.got_changed:
+            self.Plot.fundamentals = self.AnalysisDial.fundamentals
+            self.Plot.fundamentals_SCH = self.AnalysisDial.fundamentals_SCH
+            self.Plot.times = self.AnalysisDial.times
+            self.times = self.AnalysisDial.times
+
             if self.Plot.spec_img_handle:
                 self.Plot.spec_img_handle.remove()
+            # self.Plot.spec_img_handle = self.Plot.ax.imshow(decibel(self.AnalysisDial.tmp_spectra)[::-1],
+            #                                            extent=[self.AnalysisDial.SpecSettings.start_time, self.AnalysisDial.SpecSettings.end_time, 0, 2000],
+            #                                            aspect='auto', alpha=0.7, cmap='jet', vmin=-100, vmax=-50,
+            #                                            interpolation='gaussian')
+            #
+            dt = self.Plot.times[1] - self.Plot.times[0]
             self.Plot.spec_img_handle = self.Plot.ax.imshow(decibel(self.AnalysisDial.tmp_spectra)[::-1],
-                                                       extent=[self.AnalysisDial.SpecSettings.start_time, self.AnalysisDial.SpecSettings.end_time, 0, 2000],
-                                                       aspect='auto', alpha=0.7, cmap='jet', vmin=-80, vmax=-50,
+                                                       extent=[self.Plot.times[0], self.Plot.times[-1] + dt, 0, 2000],
+                                                       aspect='auto', alpha=0.7, cmap='jet', vmin=-100, vmax=-50,
                                                        interpolation='gaussian')
 
-            self.Plot.ax.set_xlim(self.AnalysisDial.SpecSettings.start_time, self.AnalysisDial.SpecSettings.end_time)
+            # self.Plot.ax.set_xlim(self.AnalysisDial.SpecSettings.start_time, self.AnalysisDial.SpecSettings.end_time)
+            self.Plot.ax.set_xlim(self.Plot.times[0], self.Plot.times[-1] + dt)
             self.Plot.ax.set_ylim(400, 1000)
             self.Plot.canvas.draw()
 
@@ -1806,8 +1903,8 @@ class MainWindow(QMainWindow):
             self.Plot.init_xlim = x_lim
             self.Plot.init_ylim = y_lim
 
-            self.times = self.AnalysisDial.times
-            self.Plot.times = self.AnalysisDial.times
+            # self.times = self.AnalysisDial.times
+            # self.Plot.times = self.AnalysisDial.times
 
             self.AnalysisDial.got_changed = False
 
