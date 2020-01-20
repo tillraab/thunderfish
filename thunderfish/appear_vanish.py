@@ -220,18 +220,6 @@ class Traces():
         self.fig.canvas.mpl_connect('button_press_event', self.buttonpress)
         self.fig.canvas.mpl_connect('button_release_event', self.buttonrelease)
 
-        # keymap.fullscreen : f, ctrl+f       # toggling
-        # keymap.home : h, r, home            # home or reset mnemonic
-        # keymap.back : left, c, backspace    # forward / backward keys to enable
-        # keymap.forward : right, v           #   left handed quick navigation
-        # keymap.pan : p                      # pan mnemonic
-        # keymap.zoom : o                     # zoom mnemonic
-        # keymap.save : s                     # saving current figure
-        # keymap.quit : ctrl+w, cmd+w         # close the current figure
-        # keymap.grid : g                     # switching on/off a grid in current axes
-        # keymap.yscale : l                   # toggle scaling of y-axes ('log'/'linear')
-        # keymap.xscale : L, k                # toggle scaling of x-axes ('log'/'linear')
-        # keymap.all_axes : a                 # enable all axes
 
         plt.rcParams['keymap.save'] = ''  # was s
         plt.rcParams['keymap.back'] = ''  # was c
@@ -283,8 +271,6 @@ class Traces():
             self.y_pos.append(Cy)
             # self.sign_v.append(Csign_v)
 
-        # embed()
-        # quit()
 
         for i in tqdm(range(len(self.folders))):
             # fund_v, idx_v, id_v, times, spec, m0, id_tag = load_data(self.folders[i])
@@ -350,10 +336,6 @@ class Traces():
         x_ticks = ['10.04.', '11.04.', '12.04.', '13.04.', '14.04.', '15.04.', '16.04.', '17.04.', '18.04.']
         self.ax.set_xticks(np.arange((1440 - self.m0[0] + 12 *  60) / 60, (self.times[-1][-1] / 60 + self.shift[-1]) / 60 + 24, 24))
         self.ax.set_xticklabels(x_ticks, rotation = 50)
-
-
-        # embed()
-        # quit()
 
         plt.show()
 
@@ -558,7 +540,8 @@ class Traces():
 
                 id_x_pos.extend(self.x_pos[rec_no][self.id_v[rec_no] == id_no])
                 id_y_pos.extend(self.y_pos[rec_no][self.id_v[rec_no] == id_no])
-                id_freq.extend(self.fund_v[rec_no][self.idx_v[rec_no][self.id_v[rec_no] == id_no]]) # ToDo fehlerhaft
+                id_freq.extend(self.fund_v[rec_no][self.id_v[rec_no] == id_no]) # ToDo fehlerhaft
+                # id_freq.extend(self.fund_v[rec_no][self.idx_v[rec_no][self.id_v[rec_no] == id_no]]) # ToDo fehlerhaft
 
                 id_idx[rec_no].extend(np.arange(len(self.fund_v[rec_no]))[self.id_v[rec_no] == id_no])
 
@@ -570,10 +553,12 @@ class Traces():
 
                 id_x_pos.extend(self.x_pos[rec_no][self.id_v[rec_no] == id_no])
                 id_y_pos.extend(self.y_pos[rec_no][self.id_v[rec_no] == id_no])
+                id_freq.extend(self.fund_v[rec_no][self.id_v[rec_no] == id_no])
+                # id_freq.extend(self.fund_v[rec_no][self.idx_v[rec_no][self.id_v[rec_no] == id_no]])
 
                 id_pos_time.extend(
                     self.times[rec_no][self.idx_v[rec_no][self.id_v[rec_no] == id_no]] + self.shift[rec_no] * 60)
-                id_freq.extend(self.fund_v[rec_no][self.idx_v[rec_no][self.id_v[rec_no] == id_no]])
+
                 id_idx[rec_no].extend(np.arange(len(self.fund_v[rec_no]))[self.id_v[rec_no] == id_no])
                 # id_sign.extend(self.sign_v[rec_no][self.idx_v[rec_no][self.id_v[rec_no] == id_no]])
                 rec_no2 = rec_no + 1
@@ -584,7 +569,8 @@ class Traces():
                                 np.array(self.id_connect)[:, 1] == id_to_find)][0]
                     id_x_pos.extend(self.x_pos[rec_no2][self.id_v[rec_no2] == id_to_find])
                     id_y_pos.extend(self.y_pos[rec_no2][self.id_v[rec_no2] == id_to_find])
-                    id_freq.extend(self.fund_v[rec_no2][self.idx_v[rec_no2][self.id_v[rec_no2] == id_to_find]])
+                    id_freq.extend(self.fund_v[rec_no2][self.id_v[rec_no2] == id_to_find])
+                    # id_freq.extend(self.fund_v[rec_no2][self.idx_v[rec_no2][self.id_v[rec_no2] == id_to_find]])
 
                     id_idx[rec_no2].extend(np.arange(len(self.fund_v[rec_no2]))[self.id_v[rec_no2] == id_to_find])
                     # id_sign.extend(self.sign_v[rec_no2][self.idx_v[rec_no2][self.id_v[rec_no2] == id_to_find]])
@@ -868,17 +854,10 @@ class Traces():
             min_dS = np.load('../../../analysis/pairs_min_ds.npy')
             dt = np.load('../../../analysis/pairs_dt.npy')
 
-        # pairs longer 12h and minimal distance
-        # embed()
-        # quit()
         s_pairs = pairs[dt/ 3600 > 12][np.argsort(min_dS[dt/3600 > 12])]
         sorted_pairs = []
         sorted_pairs.extend(s_pairs[s_pairs[:, 1] == s_pairs[0, 0]][::-1, ::-1])
         sorted_pairs.extend(s_pairs[s_pairs[:, 0] == s_pairs[0, 0]])
-        # sorted_pairs = sorted_pairs[sorted_pairs[:, 0] == sorted_pairs[0, 0]]
-
-        # i = sorted_pairs[0][0]
-        # j = sorted_pairs[0][1]
 
         glob_speed_slopes = []
         glob_speed_bins = []
@@ -1823,11 +1802,25 @@ class Traces():
         #############################################################################
         # FOR POSTER
 
+        plt.close('all')
+
         colors = ['k', '#BA2D22', '#53379B', '#F47F17', '#3673A4', '#AAB71B', '#DC143C', '#1E90FF', 'firebrick', 'cornflowerblue', 'forestgreen']
         sorted_pairs = np.array(sorted_pairs)
 
         for enu, i in enumerate(np.hstack([sorted_pairs[0, 0], sorted_pairs[:, 1]])):
-            print(enu)
+
+            fish_combo_data = [] # time, frequency, x-pos, y-pos
+
+            fish_combo_data.append(all_id_pos_time[i])
+            fish_combo_data.append([])
+            # fish_combo_data.append(all_id_freq[i])
+            fish_combo_data.append(all_id_x_pos[i])
+            fish_combo_data.append(all_id_y_pos[i])
+
+            # import glob
+            # fish_n = len(glob.glob('/home/raab/code/fish_combo_data*'))
+            np.save('/home/raab/code/dfg_grand/fish_combo_data_%.0f.npy' % enu, np.array(fish_combo_data))
+
             day_area = []
             night_area = []
 
@@ -1953,6 +1946,7 @@ class Traces():
                 plt.tight_layout()
 
         g_fig.tight_layout()
+        # plt.close('all')
         plt.show()
         ####################################################################################
         # if sp <= 4:
@@ -2240,50 +2234,29 @@ class Traces():
 
 def main():
 
-    folders = ['/home/raab/data/colombia/2016-04-09-22_25',
-               '/home/raab/data/colombia/2016-04-10-11_12',
-               '/home/raab/data/colombia/2016-04-10-22:14/error-22:14',
-               '/home/raab/data/colombia/2016-04-11-09:56',
-               '/home/raab/data/colombia/2016-04-11-22:11',
-               '/home/raab/data/colombia/2016-04-12-19_05',
-               '/home/raab/data/colombia/2016-04-13-07_08',
-               '/home/raab/data/colombia/2016-04-13-20_08',
-               '/home/raab/data/colombia/2016-04-14-19_12',
-               '/home/raab/data/colombia/2016-04-15-07_58',
-               '/home/raab/data/colombia/2016-04-15-20_02',
-               '/home/raab/data/colombia/2016-04-16-08_19',
-               '/home/raab/data/colombia/2016-04-16-18_45',
-               '/home/raab/data/colombia/2016-04-17-08_06',
-               '/home/raab/data/colombia/2016-04-17-19_04']
-
-    # folders = ['/home/raab/data/colombia/2016-04-09-22_25',
-    #            '/home/raab/data/colombia/2016-04-10-11_12',
-    #            '/home/raab/data/colombia/2016-04-11-09:56',
-    #            '/home/raab/data/colombia/2016-04-11-22:11',
-    #            '/home/raab/data/colombia/2016-04-12-19_05',
-    #            '/home/raab/data/colombia/2016-04-13-07_08',
-    #            '/home/raab/data/colombia/2016-04-13-20_08',
-    #            '/home/raab/data/colombia/2016-04-14-19_12',
-    #            '/home/raab/data/colombia/2016-04-15-07_58',
-    #            '/home/raab/data/colombia/2016-04-15-20_02',
-    #            '/home/raab/data/colombia/2016-04-16-08_19',
-    #            '/home/raab/data/colombia/2016-04-16-18_45',
-    #            '/home/raab/data/colombia/2016-04-17-08_06',
-    #            '/home/raab/data/colombia/2016-04-17-19_04']
-
-
+    folders = ['/home/raab/data/2016-colombia/2016-04-09-22_25',
+               '/home/raab/data/2016-colombia/2016-04-10-11_12',
+               '/home/raab/data/2016-colombia/2016-04-10-22:14/error-22:14',
+               '/home/raab/data/2016-colombia/2016-04-11-09:56',
+               '/home/raab/data/2016-colombia/2016-04-11-22:11',
+               '/home/raab/data/2016-colombia/2016-04-12-19_05',
+               '/home/raab/data/2016-colombia/2016-04-13-07_08',
+               '/home/raab/data/2016-colombia/2016-04-13-20_08',
+               '/home/raab/data/2016-colombia/2016-04-14-19_12',
+               '/home/raab/data/2016-colombia/2016-04-15-07_58',
+               '/home/raab/data/2016-colombia/2016-04-15-20_02',
+               '/home/raab/data/2016-colombia/2016-04-16-08_19',
+               '/home/raab/data/2016-colombia/2016-04-16-18_45',
+               '/home/raab/data/2016-colombia/2016-04-17-08_06',
+               '/home/raab/data/2016-colombia/2016-04-17-19_04']
 
     shift = [0, 767, 1429, 2131, 2866, 4120, 4843, 5623, 7007, 7773, 8497, 9234, 9860, 10661, 11319]
-    #
-    # shift = [0, 767, 2131, 2866, 4120, 4843, 5623, 7007, 7773, 8497, 9234, 9860, 10661, 11319]
-
 
     if len(sys.argv) >= 2:
         folders = folders[:3]
         shift = shift[:3]
 
     Traces(folders, shift)
-
 
 if __name__ == '__main__':
     main()

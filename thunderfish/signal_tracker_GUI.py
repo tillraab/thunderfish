@@ -4,8 +4,6 @@ import time
 import datetime
 import numpy as np
 import matplotlib.pyplot as plt
-import multiprocessing
-from functools import partial
 from .version import __version__
 from .powerspectrum import decibel, next_power_of_two, spectrogram
 from .dataloader import open_data, fishgrid_grids, fishgrid_spacings
@@ -207,6 +205,7 @@ class SettingsHarmonicGroup(QMainWindow):
         self.cfg.update({'max_rel_power_weight': self.max_rel_power_weight})
         self.cfg.update({'max_rel_power': self.max_rel_power})
 
+
 class SettingsSpectrogram(QMainWindow):
     def __init__(self):
         super().__init__()
@@ -323,6 +322,7 @@ class SettingsSpectrogram(QMainWindow):
         if self.samplerate:
             self.real_nfft.setText('%.0f' % next_power_of_two(self.samplerate / self.fresolution))
             self.temp_res.setText('%.3f' % (next_power_of_two(self.samplerate / self.fresolution) * (1. - self.overlap_frac) / self.samplerate))
+
 
 class AnalysisDialog(QMainWindow):
     def __init__(self):
@@ -676,6 +676,7 @@ class AnalysisDialog(QMainWindow):
 
         pool.terminate()
 
+
 class GridDialog(QMainWindow):
     def __init__(self):
         super().__init__()
@@ -814,6 +815,7 @@ class GridDialog(QMainWindow):
         # print(e.key())
         if e.key() == Qt.Key_Return:
             self.update_grid()
+
 
 class PlotWidget():
     def __init__(self):
@@ -1097,6 +1099,7 @@ class PlotWidget():
         self.ax.set_ylim(*new_ylim)
         self.figure.canvas.draw()
 
+
 class MainWindow(QMainWindow):
     def __init__(self, parent=None):
         super(MainWindow, self).__init__(parent)
@@ -1108,7 +1111,6 @@ class MainWindow(QMainWindow):
         self.Grid = GridDialog()
 
         self.AnalysisDial = AnalysisDialog()
-
 
         self.initMe()
 
@@ -1308,6 +1310,7 @@ class MainWindow(QMainWindow):
         self.Act_save = QAction('&Save', self)
         self.Act_save.setEnabled(False)
         self.Act_save.setStatusTip('Save traces')
+        self.Act_save.triggered.connect(self.save)
 
         # exitMe = QAction(QIcon('<path>'), '&Exit', self)
         self.Act_exit = QAction('&Exit', self)  # trigger with alt+E
@@ -1545,6 +1548,8 @@ class MainWindow(QMainWindow):
                 self.Plot.highlight_group(self.active_idx, self.ident_v, self.times, self.idx_v, self.fund_v)
                 self.Plot.canvas.draw()
 
+    def save(self):
+        np.save(os.path.join(self.folder, 'ident_v.npy'), self.ident_v)
 
     def open(self):
         def get_datetime(folder):
@@ -1826,6 +1831,7 @@ class MainWindow(QMainWindow):
         #     mask = np.arange(len(self.id_tag))[help_mask]
         #     self.id_tag = self.id_tag[mask]
 
+    # @QtCore.PYQT_SLOT
     def reset_variables(self):
         self.active_idx = None
         self.active_id = None

@@ -4,10 +4,13 @@ import matplotlib.gridspec as gridspec
 import os
 from IPython import embed
 from tqdm import tqdm
+from PyQt5.QtCore import *
 
+class Emit_progress():
+    progress = pyqtSignal(float)
 
 def freq_tracking_v5(fundamentals, signatures, times, freq_tolerance= 10., n_channels=64, max_dt=10., ioi_fti=False,
-                     freq_lims=(400, 1200)):
+                     freq_lims=(400, 1200), emit = False):
     """
     Sorting algorithm which sorts fundamental EOD frequnecies detected in consecutive powespectra of single or
     multielectrode recordings using frequency difference and frequnency-power amplitude difference on the electodes.
@@ -406,52 +409,52 @@ def freq_tracking_v5(fundamentals, signatures, times, freq_tolerance= 10., n_cha
 
         # embed()
         # quit()
-        id_comb_part_df = np.array(id_comb_part_df)
-        sorting_mask = np.argsort(id_comb_part_df)[:len(id_comb_part_df[id_comb_part_df <= 25])]
-
-        for i, (id0, id1) in enumerate(np.array(id_comb)[sorting_mask]):
-            comb_f = np.concatenate(id_comb_freqs[sorting_mask[i]])
-
-            bins = np.arange((np.min(comb_f) // .1) * .1, (np.max(comb_f) // .1) * .1 + .1, .1)
-            bc = bins[:-1] + (bins[1:] - bins[:-1]) / 2
-
-            n0, bins = np.histogram(id_comb_freqs[sorting_mask[i]][0], bins=bins)
-
-            n1, bins = np.histogram(id_comb_freqs[sorting_mask[i]][1], bins=bins)
-
-            greater_mask = n0 >= n1
-
-            overlapping_counts = np.sum(np.concatenate((n1[greater_mask], n0[~greater_mask])))
-
-            pct_overlap = np.max([overlapping_counts / np.sum(n1), overlapping_counts / np.sum(n0)])
-
-            if pct_overlap >= 0:
-
-                fig, ax = plt.subplots(1, 2, facecolor='white', figsize=(20 / 2.54, 12 / 2.54))
-                # embed()
-                # quit()
-                for j in range(len(ids)):
-                    if ids[j] == ids[id0]:
-                        ax[0].plot(tmp_idx_v[tmp_ident_v == ids[j]], tmp_fund_v[tmp_ident_v == ids[j]], marker='.', markersize=4,
-                                   color='red', alpha = 0.5)
-                        ax[0].plot(tmp_idx_v[id_comb_idx[sorting_mask[i]][0]], id_comb_freqs[sorting_mask[i]][0], marker='o', markersize=4,
-                                   color='red')
-
-                    elif ids[j] == ids[id1]:
-                        ax[0].plot(tmp_idx_v[tmp_ident_v == ids[j]], tmp_fund_v[tmp_ident_v == ids[j]], marker='.', markersize=4,
-                                   color='blue', alpha = 0.5)
-                        ax[0].plot(tmp_idx_v[id_comb_idx[sorting_mask[i]][1]], id_comb_freqs[sorting_mask[i]][1], marker='o',
-                                   markersize=4,
-                                   color='blue')
-                    else:
-                        ax[0].plot(tmp_idx_v[tmp_ident_v == ids[j]], tmp_fund_v[tmp_ident_v == ids[j]], marker='.', markersize=4,
-                                   color='grey')
-
-                ax[1].set_title('%.2f' % pct_overlap)
-                ax[1].bar(bc, n0, color='red', alpha=.5, width=.08)
-                ax[1].bar(bc, n1, color='blue', alpha=.5, width=.08)
-                ax[0].set_ylim(np.mean(ax[1].get_xlim()) - 5, np.mean(ax[1].get_xlim()) + 5)
-                plt.show()
+        # id_comb_part_df = np.array(id_comb_part_df)
+        # sorting_mask = np.argsort(id_comb_part_df)[:len(id_comb_part_df[id_comb_part_df <= 25])]
+        #
+        # for i, (id0, id1) in enumerate(np.array(id_comb)[sorting_mask]):
+        #     comb_f = np.concatenate(id_comb_freqs[sorting_mask[i]])
+        #
+        #     bins = np.arange((np.min(comb_f) // .1) * .1, (np.max(comb_f) // .1) * .1 + .1, .1)
+        #     bc = bins[:-1] + (bins[1:] - bins[:-1]) / 2
+        #
+        #     n0, bins = np.histogram(id_comb_freqs[sorting_mask[i]][0], bins=bins)
+        #
+        #     n1, bins = np.histogram(id_comb_freqs[sorting_mask[i]][1], bins=bins)
+        #
+        #     greater_mask = n0 >= n1
+        #
+        #     overlapping_counts = np.sum(np.concatenate((n1[greater_mask], n0[~greater_mask])))
+        #
+        #     pct_overlap = np.max([overlapping_counts / np.sum(n1), overlapping_counts / np.sum(n0)])
+        #
+        #     if pct_overlap >= 0:
+        #
+        #         fig, ax = plt.subplots(1, 2, facecolor='white', figsize=(20 / 2.54, 12 / 2.54))
+        #         # embed()
+        #         # quit()
+        #         for j in range(len(ids)):
+        #             if ids[j] == ids[id0]:
+        #                 ax[0].plot(tmp_idx_v[tmp_ident_v == ids[j]], tmp_fund_v[tmp_ident_v == ids[j]], marker='.', markersize=4,
+        #                            color='red', alpha = 0.5)
+        #                 ax[0].plot(tmp_idx_v[id_comb_idx[sorting_mask[i]][0]], id_comb_freqs[sorting_mask[i]][0], marker='o', markersize=4,
+        #                            color='red')
+        #
+        #             elif ids[j] == ids[id1]:
+        #                 ax[0].plot(tmp_idx_v[tmp_ident_v == ids[j]], tmp_fund_v[tmp_ident_v == ids[j]], marker='.', markersize=4,
+        #                            color='blue', alpha = 0.5)
+        #                 ax[0].plot(tmp_idx_v[id_comb_idx[sorting_mask[i]][1]], id_comb_freqs[sorting_mask[i]][1], marker='o',
+        #                            markersize=4,
+        #                            color='blue')
+        #             else:
+        #                 ax[0].plot(tmp_idx_v[tmp_ident_v == ids[j]], tmp_fund_v[tmp_ident_v == ids[j]], marker='.', markersize=4,
+        #                            color='grey')
+        #
+        #         ax[1].set_title('%.2f' % pct_overlap)
+        #         ax[1].bar(bc, n0, color='red', alpha=.5, width=.08)
+        #         ax[1].bar(bc, n1, color='blue', alpha=.5, width=.08)
+        #         ax[0].set_ylim(np.mean(ax[1].get_xlim()) - 5, np.mean(ax[1].get_xlim()) + 5)
+        #         plt.show()
                 # plt.show(block=False)
                 # plt.waitforbuttonpress()
                 # plt.close(fig)
@@ -664,6 +667,9 @@ def freq_tracking_v5(fundamentals, signatures, times, freq_tolerance= 10., n_cha
 
         return ident_v, next_identity
 
+    if emit:
+        Emit = Emit_progress()
+
     fund_v, ident_v, idx_v, sign_v, original_sign_v, idx_of_origin_v, idx_comp_range, dps = reshape_data()
     start_idx = 0 if not ioi_fti else idx_v[ioi_fti]  # Index Of Interest for temporal identities
 
@@ -678,6 +684,9 @@ def freq_tracking_v5(fundamentals, signatures, times, freq_tolerance= 10., n_cha
     next_cleanup = int(idx_comp_range * 120)
 
     for i in tqdm(np.arange(len(fundamentals)), desc='tracking'):
+        if emit == True:
+            Emit_progress.progress.emit(i / len(fundamentals) * 100)
+
         if len(np.hstack(i0_m)) == 0 or len(np.hstack(i0_m)) == 0:
             error_cube, i0_m, i1_m, cube_app_idx = create_error_cube(i0_m, i1_m, error_cube, cube_app_idx, freq_lims,
                                                                      update=True)
@@ -816,7 +825,7 @@ def main():
 
     fundamentals, signatures = back_shape_data(fund_v, sign_v, idx_v, times)
 
-    fund_v, ident_v, idx_v, sign_v, a_error_distribution, f_error_distribution, idx_of_origin_v, original_sign_v, = \
+    fund_v, ident_v, idx_v, sign_v, a_error_distribution, f_error_distribution, idx_of_origin_v, original_sign_v = \
         freq_tracking_v5(fundamentals, signatures, times)
 
     plot_tracked_traces(ident_v, fund_v, idx_v, times)
