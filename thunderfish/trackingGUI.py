@@ -291,21 +291,6 @@ class SettingsSpectrogram(QMainWindow):
             self.temp_res.setText('%.3f' % (next_power_of_two(self.samplerate / self.fresolution) * (1. - self.overlap_frac) / self.samplerate))
 
 
-# class Test_thread(QThread):
-#     finished = pyqtSignal()
-#     progress = pyqtSignal(float)
-#
-#     def __init__(self):
-#         super().__init__()
-#         # self.signals = WorkerSignals()
-#
-#     def run(self):
-#         for i in range(3):
-#             self.progress.emit(i/2 * 100)
-#             print(i/ 2)
-#             time.sleep(1)
-#         self.finished.emit()
-
 class EOD_extraxt(QThread):
     finished = pyqtSignal()
     progress = pyqtSignal(float)
@@ -383,9 +368,6 @@ class EOD_extraxt(QThread):
             else:
                 a = pool.map(func, [self.data[start_idx: start_idx + self.SpecSettings.data_snippet_idxs, channel] for channel in
                                     self.channel_list])  # ret: spec, freq, time
-
-            # embed()
-            # quit()
 
             self.spectra = [a[channel][0] for channel in range(len(a))]
             self.spec_freqs = a[0][1]
@@ -470,19 +452,9 @@ class EOD_extraxt(QThread):
             self.power = [np.array([]) for i in range(len(self.spec_times))]
             for t in range(len(self.spec_times)):
                 self.power[t] = np.mean(self.comb_spectra[:, t:t + 1], axis=1)
-            self.extract_fundamentals_and_signatures()
 
-            # if self.CB_SCH_analysis.isChecked():
-            #     for self.ch in self.channel_list:
-            #         self.fundamentals_SCH.append([])
-            #         self.signatures_SCH.append([])
-            #         # ToDo: error here !!!
-            #         self.power = [np.array([]) for i in range(len(self.spec_times))]
-            #
-            #         for t in range(len(self.spec_times)):
-            #             self.power[t] = np.mean(self.spectra[self.ch][:, t:t + 1], axis=1)
-            #             # self.power[t] = np.mean(self.comb_spectra[:, t:t + 1], axis=1)
-            #         self.extract_fundamentals_and_signatures(channel = self.ch)
+
+            self.extract_fundamentals_and_signatures()
 
             non_overlapping_idx = (1 - self.SpecSettings.overlap_frac) * nfft
             start_idx += int((len(self.spec_times) - self.SpecSettings.nffts_per_psd + 1) * non_overlapping_idx)
@@ -496,7 +468,7 @@ class EOD_extraxt(QThread):
 
                 self.fund_v, self.ident_v, self.idx_v, self.sign_v, self.a_error_distribution, \
                 self.f_error_distribution, self.idx_of_origin_v, self.original_sign_v = \
-                    freq_tracking_v5(self.fundamentals, self.signatures, self.times, n_channels=self.channels)
+                    freq_tracking_v5(self.fundamentals, self.signatures, self.times, freq_tolerance=self.HGSettings.freq_tol_fac, n_channels=self.channels)
 
                 self.finished.emit()
                 break
@@ -505,6 +477,8 @@ class EOD_extraxt(QThread):
         core_count = multiprocessing.cpu_count()
         pool = multiprocessing.Pool(core_count // 2)
 
+        # embed()
+        # quit()
         if channel == None:
             func = partial(harmonic_groups, self.spec_freqs, low_threshold = self.HGSettings.low_threshold_G,
                            high_threshold = self.HGSettings.high_threshold_G, **self.HGSettings.cfg)
@@ -512,6 +486,8 @@ class EOD_extraxt(QThread):
             func = partial(harmonic_groups, self.spec_freqs, low_threshold = self.HGSettings.low_threshold,
                            high_threshold = self.HGSettings.high_threshold, **self.HGSettings.cfg)
         a = pool.map(func, self.power)
+
+
 
         if channel == None:
             if self.HGSettings.low_threshold_G <= 0 or self.HGSettings.high_threshold_G <= 0:
@@ -600,6 +576,10 @@ class MainWindow(QMainWindow):
         self.central_widget.setLayout(self.gridLayout)
         self.setCentralWidget(self.central_widget)
 
+        self.filenames = []
+        self.total_file_count = 0
+        self.finisched_count = 0
+
     def params(self):
         self.filename = None
         self.folder = None
@@ -681,6 +661,9 @@ class MainWindow(QMainWindow):
     @pyqtSlot()
     def thread_finished(self):
         # self.test_thread.wait()
+        self.finisched_count += 1
+        self.open_B.setText('open (%.0f/%.0f)' % (self.finisched_count, self.total_file_count))
+
         self.EodEctractThread.wait()
         self.HG_B.setEnabled(True)
         self.Spec_B.setEnabled(True)
@@ -697,16 +680,79 @@ class MainWindow(QMainWindow):
         if self.auto_save_cb.isChecked():
             self.save()
             # self.EodEctractThread.close()
+            # self.close()
+
+        self.filenames.pop(0)
+        if len(self.filenames) == 0:
+            print('all files analysed')
             self.close()
             quit()
+        else:
+            self.params()
+            # self.filename, ok = self.filenames[0]
+            self.run_main()
 
+
+
+        # ToDo: get next file and continue !!!
     @pyqtSlot()
     def run_main(self):
-        self.HG_B.setEnabled(False)
-        self.Spec_B.setEnabled(False)
+        def get_datetime(folder):
+            rec_year, rec_month, rec_day, rec_time = \
+                os.path.split(os.path.split(folder)[-1])[-1].split('-')
+            rec_year = int(rec_year)
+            rec_month = int(rec_month)
+            rec_day = int(rec_day)
+            try:
+                rec_time = [int(rec_time.split('_')[0]), int(rec_time.split('_')[1]), 0]
+            except:
+                rec_time = [int(rec_time.split(':')[0]), int(rec_time.split(':')[1]), 0]
 
-        # self.test_thread.start()
-        self.EodEctractThread.start()
+            rec_datetime = datetime.datetime(year=rec_year, month=rec_month, day=rec_day, hour=rec_time[0],
+                                             minute=rec_time[1], second=rec_time[2])
+
+
+            return rec_datetime
+
+        self.filename, ok = self.filenames[0]
+
+        if ok:
+            self.open_fileL.setText(os.path.join('...', os.path.split(os.path.split(self.filename)[0])[-1]))
+
+            self.folder = os.path.split(self.filename)[0]
+            self.rec_datetime = get_datetime(self.folder)
+
+            self.data = open_data(self.filename, -1, 60.0, 10.0)
+            self.EodEctractThread.data = self.data
+
+            self.samplerate= self.data.samplerate
+            self.EodEctractThread.samplerate = self.samplerate
+            self.EodEctractThread.SpecSettings.samplerate = self.samplerate
+
+            self.channels = self.data.channels
+            self.EodEctractThread.channels = self.data.channels
+            self.EodEctractThread.channel_list = np.arange(self.channels)
+
+            self.open_fileL.setText(os.path.join('...', os.path.split(os.path.split(self.filename)[0])[-1]))
+
+            if os.path.exists(os.path.join(os.path.split(self.filename)[0], 'fishgrid.cfg')):
+                self.elecs_y, self.elecs_x = fishgrid_grids(self.filename)[0]
+                self.elecs_y_spacing, self.elecs_x_spacing = fishgrid_spacings(self.filename)[0]
+
+            self.HG_B.setEnabled(False)
+            self.Spec_B.setEnabled(False)
+
+            # self.test_thread.start()
+            self.EodEctractThread.start()
+        else:
+            print('error in data')
+            self.filenames.pop(0)
+
+            if len(self.filenames) == 0:
+                quit()
+            else:
+                self.params()
+                self.run_main()
 
     @pyqtSlot()
     def HG_main(self):
@@ -738,31 +784,35 @@ class MainWindow(QMainWindow):
         fd = QFileDialog()
         self.filename, ok = fd.getOpenFileName(self, 'Open File', '/', 'Select Raw-File (*.raw)')
 
+        self.filenames.append((self.filename, ok))
+        self.total_file_count += 1
+        self.open_B.setText('open (%.0f/%.0f)' % (self.finisched_count, self.total_file_count))
+
         # if os.path.exists('/home/raab/data/'):
         #     self.filename, ok = fd.getOpenFileName(self, 'Open File', '/home/raab/data/', 'Select Raw-File (*.raw)')
         # else:
         #     self.filename, ok = fd.getOpenFileName(self, 'Open File', '/home/', 'Select Raw-File (*.raw)')
 
-        if ok:
-            self.folder = os.path.split(self.filename)[0]
-            self.rec_datetime = get_datetime(self.folder)
-
-            self.data = open_data(self.filename, -1, 60.0, 10.0)
-            self.EodEctractThread.data = self.data
-
-            self.samplerate= self.data.samplerate
-            self.EodEctractThread.samplerate = self.samplerate
-            self.EodEctractThread.SpecSettings.samplerate = self.samplerate
-
-            self.channels = self.data.channels
-            self.EodEctractThread.channels = self.data.channels
-            self.EodEctractThread.channel_list = np.arange(self.channels)
-
-            self.open_fileL.setText(os.path.join('...', os.path.split(os.path.split(self.filename)[0])[-1]))
-
-            if os.path.exists(os.path.join(os.path.split(self.filename)[0], 'fishgrid.cfg')):
-                self.elecs_y, self.elecs_x = fishgrid_grids(self.filename)[0]
-                self.elecs_y_spacing, self.elecs_x_spacing = fishgrid_spacings(self.filename)[0]
+        # if ok:
+        #     self.folder = os.path.split(self.filename)[0]
+        #     self.rec_datetime = get_datetime(self.folder)
+        #
+        #     self.data = open_data(self.filename, -1, 60.0, 10.0)
+        #     self.EodEctractThread.data = self.data
+        #
+        #     self.samplerate= self.data.samplerate
+        #     self.EodEctractThread.samplerate = self.samplerate
+        #     self.EodEctractThread.SpecSettings.samplerate = self.samplerate
+        #
+        #     self.channels = self.data.channels
+        #     self.EodEctractThread.channels = self.data.channels
+        #     self.EodEctractThread.channel_list = np.arange(self.channels)
+        #
+        #     self.open_fileL.setText(os.path.join('...', os.path.split(os.path.split(self.filename)[0])[-1]))
+        #
+        #     if os.path.exists(os.path.join(os.path.split(self.filename)[0], 'fishgrid.cfg')):
+        #         self.elecs_y, self.elecs_x = fishgrid_grids(self.filename)[0]
+        #         self.elecs_y_spacing, self.elecs_x_spacing = fishgrid_spacings(self.filename)[0]
 
     @pyqtSlot()
     def save(self):

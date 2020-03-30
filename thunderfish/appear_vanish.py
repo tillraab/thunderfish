@@ -259,6 +259,8 @@ class Traces():
             self.id_connect = list(np.load('/home/raab/analysis/id_connect.npy'))
             self.connections = list(np.load('/home/raab/analysis/connections.npy'))
 
+
+
         for i in tqdm(range(len(self.folders))):
             Cfund_v, Cidx_v, Cid_v, Ctimes, Cspec, Cm0, Cid_tag, Cx, Cy = load_data(self.folders[i])
             self.fund_v.append(Cfund_v)
@@ -270,6 +272,67 @@ class Traces():
             self.x_pos.append(Cx)
             self.y_pos.append(Cy)
             # self.sign_v.append(Csign_v)
+
+        embed()
+        quit()
+
+        save_data = False
+        if save_data:
+            self.id_connect = np.array(self.id_connect)
+            non_taged_time = []
+            non_taged_freq = []
+            for i in tqdm(range(len(self.folders))):
+                ids = self.id_tag[i][:, 0][self.id_tag[i][:, 1] == 1]
+
+                mask = []
+                for id in self.id_v[i]:
+                    mask.append(id not in ids)
+                # mask = [id not in ids for id in self.id_v[i]]
+                non_taged_idx = np.arange(len(self.id_v[i]))[mask]
+                non_taged_idx = non_taged_idx[~np.isnan(self.id_v[i][non_taged_idx])]
+
+                non_taged_time.extend(self.times[i][self.idx_v[i][non_taged_idx]][::90] + self.shift[i] * 60)
+                non_taged_freq.extend(self.fund_v[i][non_taged_idx][::90])
+
+            saved_idx = np.zeros(len(self.id_connect), dtype=bool)
+            freq_assigned = []
+            time_assigned = []
+            color_assigned = []
+
+            while len(saved_idx[saved_idx == 0]) != 0:
+                print(len(saved_idx[saved_idx == False]))
+                c_idxs = np.arange(len(self.id_connect))[(self.id_connect[:, 2] == None) & (saved_idx == False)]
+                if len(c_idxs) == 0:
+                    print('finished ?')
+                    embed()
+                    quit()
+                else:
+                    c_idx = c_idxs[0]
+                freq_assigned.append([])
+                time_assigned.append([])
+                color_assigned.append(self.id_connect[c_idx, 4])
+
+                rec_no = self.id_connect[c_idx, 0]
+                id = self.id_connect[c_idx, 1]
+                id_in_next = self.id_connect[c_idx, 3]
+
+                while True:
+                    print(len(saved_idx[saved_idx == False]))
+                    time_assigned[-1].extend(self.times[rec_no][self.idx_v[rec_no][self.id_v[rec_no] == id]][::90] + self.shift[rec_no] * 60)
+                    freq_assigned[-1].extend(self.fund_v[rec_no][self.id_v[rec_no] == id][::90])
+                    saved_idx[c_idx] = True
+
+                    c_idxs = np.arange(len(self.id_connect))[(self.id_connect[:, 0] == rec_no + 1) & (self.id_connect[:, 1] == id_in_next)]
+                    if len(c_idxs) == 0:
+                        break
+                    else:
+                        c_idx = c_idxs[0]
+
+                    rec_no = self.id_connect[c_idx, 0]
+                    id = self.id_connect[c_idx, 1]
+                    id_in_next = self.id_connect[c_idx, 3]
+
+
 
 
         for i in tqdm(range(len(self.folders))):
