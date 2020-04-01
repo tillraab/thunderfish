@@ -306,7 +306,9 @@ class EOD_extraxt(QThread):
 
         # self.TrackingProgress = Emit_progress()
         # self.TrackingProgress.progress.connect(self.emit_tracking_progress)
+        self.params()
 
+    def params(self):
         self.samplerate = None
         self.channels = None
         self.channel_list = []
@@ -679,8 +681,6 @@ class MainWindow(QMainWindow):
 
         if self.auto_save_cb.isChecked():
             self.save()
-            # self.EodEctractThread.close()
-            # self.close()
 
         self.filenames.pop(0)
         if len(self.filenames) == 0:
@@ -689,12 +689,10 @@ class MainWindow(QMainWindow):
             quit()
         else:
             self.params()
+            self.EodEctractThread.params()
             # self.filename, ok = self.filenames[0]
             self.run_main()
 
-
-
-        # ToDo: get next file and continue !!!
     @pyqtSlot()
     def run_main(self):
         def get_datetime(folder):
