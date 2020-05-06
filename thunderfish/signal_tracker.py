@@ -701,6 +701,9 @@ def freq_tracking_v5(fundamentals, signatures, times, freq_tolerance= 10., n_cha
             a_error_distribution, f_error_distribution = \
                 get_a_and_f_error_dist(fund_v, idx_v, sign_v, start_idx, idx_comp_range, freq_lims, freq_tolerance)
 
+            if len(np.hstack(i0_m)) == 0 or len(np.hstack(i1_m)) == 0:
+                print('### got the case ###')
+                continue
             tmp_ident_v, errors_to_v = get_tmp_identities(i0_m, i1_m, error_cube, fund_v, idx_v, i, ioi_fti,
                                                           idx_comp_range)
 

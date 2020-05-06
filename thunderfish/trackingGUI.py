@@ -281,14 +281,17 @@ class SettingsSpectrogram(QMainWindow):
         self.start_time = float(self.StartTime.text()) * 60
         self.end_time = float(self.EndTime.text()) * 60
         self.data_snippet_sec = float(self.SnippetSize.text())
-        self.data_snippet_idxs = int(self.data_snippet_sec * self.samplerate)
         self.fresolution = float(self.FreqResolution.text())
         self.overlap_frac = float(self.Overlap.text())
         self.nffts_per_psd = int(self.NfftPerPsd.text())
 
+        self.real_nfft.setText('%.0f' % next_power_of_two(20000. / self.fresolution))
+        self.temp_res.setText('%.3f' % (next_power_of_two(20000. / self.fresolution) * (1. - self.overlap_frac) / 20000.))
         if self.samplerate:
+            self.data_snippet_idxs = int(self.data_snippet_sec * self.samplerate)
             self.real_nfft.setText('%.0f' % next_power_of_two(self.samplerate / self.fresolution))
             self.temp_res.setText('%.3f' % (next_power_of_two(self.samplerate / self.fresolution) * (1. - self.overlap_frac) / self.samplerate))
+
 
 
 class EOD_extraxt(QThread):
@@ -304,6 +307,7 @@ class EOD_extraxt(QThread):
         self.HGSettings = SettingsHarmonicGroup()
         self.SpecSettings = SettingsSpectrogram()
 
+        self.single_chennel_analysis=False
         # self.TrackingProgress = Emit_progress()
         # self.TrackingProgress.progress.connect(self.emit_tracking_progress)
         self.params()
@@ -352,6 +356,10 @@ class EOD_extraxt(QThread):
         p0 = start_idx
         pn = end_idx
 
+        for ch in self.channel_list:
+            self.fundamentals_SCH.append([])
+            self.signatures_SCH.append([])
+
         while start_idx <= end_idx:
             self.progress.emit((start_idx - p0) / (end_idx - p0) * 100)
             # self.progress.setValue((start_idx - p0) / (end_idx - p0) * 100)
@@ -360,7 +368,7 @@ class EOD_extraxt(QThread):
                 last_run = True
 
             core_count = multiprocessing.cpu_count()
-            pool = multiprocessing.Pool(core_count // 2)
+            pool = multiprocessing.Pool(core_count - 1)
             nfft = next_power_of_two(self.samplerate / self.SpecSettings.fresolution)
 
             func = partial(spectrogram, samplerate=self.samplerate, freq_resolution=self.SpecSettings.fresolution, overlap_frac=self.SpecSettings.overlap_frac)
@@ -451,12 +459,32 @@ class EOD_extraxt(QThread):
                             self.tmp_spectra_SCH[ch, i, j] = np.max(self.spectra[ch][f_mask[:, None], t_mask])
 
             # if self.CBgroup_analysis.isChecked():
-            self.power = [np.array([]) for i in range(len(self.spec_times))]
-            for t in range(len(self.spec_times)):
-                self.power[t] = np.mean(self.comb_spectra[:, t:t + 1], axis=1)
+            if self.single_chennel_analysis == True:
+                # self.power = self.spectra
+                ####
+
+                for ch in self.channel_list:
+                    # self.fundamentals_SCH.append([])
+                    # self.signatures_SCH.append([])
+                    # ToDo: error here !!!
+                    self.power = [np.array([]) for i in range(len(self.spec_times))]
+
+                    for t in range(len(self.spec_times)):
+                        self.power[t] = np.mean(self.spectra[ch][:, t:t + 1], axis=1)
+                        # self.power[t] = np.mean(self.comb_spectra[:, t:t + 1], axis=1)
+                    self.extract_fundamentals_and_signatures(channel=ch)
+                ####
+            else:
+                self.power = [np.array([]) for i in range(len(self.spec_times))]
+                for t in range(len(self.spec_times)):
+                    self.power[t] = np.mean(self.comb_spectra[:, t:t + 1], axis=1)
+                self.extract_fundamentals_and_signatures()
+
+            # if self.single_chennel_analysis == True:
+            #     for i in range(len(a)):
+            #         self.extract_fundamentals_and_signatures(channel=i)
 
 
-            self.extract_fundamentals_and_signatures()
 
             non_overlapping_idx = (1 - self.SpecSettings.overlap_frac) * nfft
             start_idx += int((len(self.spec_times) - self.SpecSettings.nffts_per_psd + 1) * non_overlapping_idx)
@@ -468,29 +496,60 @@ class EOD_extraxt(QThread):
                 self.progress.emit(100)
                 # print('done')
 
-                self.fund_v, self.ident_v, self.idx_v, self.sign_v, self.a_error_distribution, \
-                self.f_error_distribution, self.idx_of_origin_v, self.original_sign_v = \
-                    freq_tracking_v5(self.fundamentals, self.signatures, self.times, freq_tolerance=self.HGSettings.freq_tol_fac, n_channels=self.channels)
+                print(np.shape(self.data))
+                print(self.channels)
+                if self.single_chennel_analysis == True:
+                    self.all_fund_v = []
+                    self.all_ident_v = []
+                    self.all_idx_v = []
+                    self.all_sign_v = []
+                    self.all_a_error_distribution = []
+                    self.all_f_error_distribution = []
+                    self.all_idx_of_origin_v = []
+                    self.all_original_sign_v = []
+
+                    for it in range(len(self.fundamentals_SCH)):
+                        print('### tracking Ch: %.0f of %.0f' % (it, len(self.fundamentals_SCH)) )
+
+                        self.fund_v, self.ident_v, self.idx_v, self.sign_v, self.a_error_distribution, \
+                        self.f_error_distribution, self.idx_of_origin_v, self.original_sign_v = \
+                            freq_tracking_v5(self.fundamentals_SCH[it], self.signatures_SCH[it], self.times,
+                                             freq_tolerance=self.HGSettings.freq_tol_fac, n_channels=self.channels)
+
+                        self.all_fund_v.append(self.fund_v)
+                        self.all_ident_v.append(self.ident_v)
+                        self.all_idx_v.append(self.idx_v)
+                        self.all_sign_v.append(self.sign_v)
+                        self.all_a_error_distribution.append(self.a_error_distribution)
+                        self.all_f_error_distribution.append(self.f_error_distribution)
+                        self.all_idx_of_origin_v.append(self.idx_of_origin_v)
+                        self.all_original_sign_v.append(self.original_sign_v)
+                    # embed()
+                    # quit()
+
+                else:
+                    self.fund_v, self.ident_v, self.idx_v, self.sign_v, self.a_error_distribution, \
+                    self.f_error_distribution, self.idx_of_origin_v, self.original_sign_v = \
+                        freq_tracking_v5(self.fundamentals, self.signatures, self.times, freq_tolerance=self.HGSettings.freq_tol_fac, n_channels=self.channels)
 
                 self.finished.emit()
                 break
 
     def extract_fundamentals_and_signatures(self, channel = None):
         core_count = multiprocessing.cpu_count()
-        pool = multiprocessing.Pool(core_count // 2)
+        pool = multiprocessing.Pool(core_count - 1)
 
-        # embed()
-        # quit()
         if channel == None:
             func = partial(harmonic_groups, self.spec_freqs, low_threshold = self.HGSettings.low_threshold_G,
-                           high_threshold = self.HGSettings.high_threshold_G, **self.HGSettings.cfg)
+                           high_threshold = self.HGSettings.high_threshold_G, min_freq = 400, max_freq=2000, **self.HGSettings.cfg)
+            a = pool.map(func, self.power)
+
         else:
             func = partial(harmonic_groups, self.spec_freqs, low_threshold = self.HGSettings.low_threshold,
-                           high_threshold = self.HGSettings.high_threshold, **self.HGSettings.cfg)
-        a = pool.map(func, self.power)
+                           high_threshold = self.HGSettings.high_threshold, min_freq = 400, max_freq=2000, **self.HGSettings.cfg)
+            a = pool.map(func, self.power)
 
-
-
+        # print(a[0][5], a[0][6])
         if channel == None:
             if self.HGSettings.low_threshold_G <= 0 or self.HGSettings.high_threshold_G <= 0:
                 self.HGSettings.low_threshold_G = a[0][5]
@@ -507,12 +566,14 @@ class EOD_extraxt(QThread):
 
         for p in range(len(self.power)):
             tmp_fundamentals = fundamental_freqs(a[p][0])
-            self.fundamentals.append(tmp_fundamentals)
+
             if self.life_plotting:
                 self.EODf_ret.append(tmp_fundamentals)
 
             if channel != None:
                 self.fundamentals_SCH[channel].append(tmp_fundamentals)
+            else:
+                self.fundamentals.append(tmp_fundamentals)
 
             if len(tmp_fundamentals) >= 1:
                 f_idx = np.array([np.argmin(np.abs(self.spec_freqs - f)) for f in tmp_fundamentals])
@@ -520,9 +581,11 @@ class EOD_extraxt(QThread):
             else:
                 tmp_signatures = np.array([])
 
-            self.signatures.append(tmp_signatures)
+
             if channel != None:
                 self.signatures_SCH[channel].append(tmp_signatures)
+            else:
+                self.signatures.append(tmp_signatures)
 
         if self.life_plotting:
             self.return_EODf.emit()
@@ -569,6 +632,7 @@ class MainWindow(QMainWindow):
         self.gridLayout.addWidget(self.open_fileL, 0, 1)
         self.gridLayout.addWidget(self.save_B, 0, 2)
         self.gridLayout.addWidget(self.auto_save_cb, 1, 2)
+        self.gridLayout.addWidget(self.single_trace_cb, 1, 0)
         self.gridLayout.addWidget(self.HG_B, 3, 0)
         self.gridLayout.addWidget(self.Spec_B, 4, 0)
         self.gridLayout.addWidget(self.run_B, 3, 2)
@@ -622,6 +686,7 @@ class MainWindow(QMainWindow):
         self.save_B.setEnabled(False)
 
         self.auto_save_cb = QCheckBox('Auto Save', self.central_widget)
+        self.single_trace_cb = QCheckBox('Single Trace', self.central_widget)
 
         self.life_plot_B = QPushButton('Life Plot', self.central_widget)
         self.life_plot_B.clicked.connect(self.life_dialog)
@@ -675,6 +740,11 @@ class MainWindow(QMainWindow):
         self.idx_v = self.EodEctractThread.idx_v
         self.original_sign_v = self.EodEctractThread.original_sign_v
 
+        self.all_fund_v = self.EodEctractThread.all_fund_v
+        self.all_ident_v = self.EodEctractThread.all_ident_v
+        self.all_idx_v = self.EodEctractThread.all_idx_v
+        self.all_original_sign_v = self.EodEctractThread.all_original_sign_v
+
         self.times = self.EodEctractThread.times
         self.tmp_spectra = self.EodEctractThread.tmp_spectra
         self.save_B.setEnabled(True)
@@ -727,8 +797,10 @@ class MainWindow(QMainWindow):
             self.EodEctractThread.samplerate = self.samplerate
             self.EodEctractThread.SpecSettings.samplerate = self.samplerate
 
-            self.channels = self.data.channels
-            self.EodEctractThread.channels = self.data.channels
+            # ToDo: delete this after again... error analysis
+            self.channels = self.data.channels - 1
+            # self.channels = self.data.channels
+            self.EodEctractThread.channels = self.data.channels - 1
             self.EodEctractThread.channel_list = np.arange(self.channels)
 
             self.open_fileL.setText(os.path.join('...', os.path.split(os.path.split(self.filename)[0])[-1]))
@@ -741,6 +813,8 @@ class MainWindow(QMainWindow):
             self.Spec_B.setEnabled(False)
 
             # self.test_thread.start()
+            if self.single_trace_cb.isChecked():
+                self.EodEctractThread.single_chennel_analysis = True
             self.EodEctractThread.start()
         else:
             print('error in data')
@@ -815,16 +889,28 @@ class MainWindow(QMainWindow):
     @pyqtSlot()
     def save(self):
         folder = self.folder
+        if self.single_trace_cb.isChecked():
+            np.save(os.path.join(folder, 'all_fund_v.npy'), self.all_fund_v)
+            np.save(os.path.join(folder, 'all_sign_v.npy'), self.all_original_sign_v)
+            np.save(os.path.join(folder, 'all_idx_v.npy'), self.all_idx_v)
+            np.save(os.path.join(folder, 'all_ident_v.npy'), self.all_ident_v)
 
-        np.save(os.path.join(folder, 'fund_v.npy'), self.fund_v)
-        np.save(os.path.join(folder, 'sign_v.npy'), self.original_sign_v)
-        np.save(os.path.join(folder, 'idx_v.npy'), self.idx_v)
-        np.save(os.path.join(folder, 'ident_v.npy'), self.ident_v)
-        np.save(os.path.join(folder, 'times.npy'), self.times)
-        np.save(os.path.join(folder, 'spec.npy'), self.tmp_spectra)
+            np.save(os.path.join(folder, 'all_times.npy'), self.times)
+            np.save(os.path.join(folder, 'spec.npy'), self.tmp_spectra)
 
-        np.save(os.path.join(folder, 'meta.npy'), np.array([self.EodEctractThread.SpecSettings.start_time,
-                                                            self.EodEctractThread.SpecSettings.end_time]))
+            np.save(os.path.join(folder, 'meta.npy'), np.array([self.EodEctractThread.SpecSettings.start_time,
+                                                                self.EodEctractThread.SpecSettings.end_time]))
+
+        else:
+            np.save(os.path.join(folder, 'fund_v.npy'), self.fund_v)
+            np.save(os.path.join(folder, 'sign_v.npy'), self.original_sign_v)
+            np.save(os.path.join(folder, 'idx_v.npy'), self.idx_v)
+            np.save(os.path.join(folder, 'ident_v.npy'), self.ident_v)
+            np.save(os.path.join(folder, 'times.npy'), self.times)
+            np.save(os.path.join(folder, 'spec.npy'), self.tmp_spectra)
+
+            np.save(os.path.join(folder, 'meta.npy'), np.array([self.EodEctractThread.SpecSettings.start_time,
+                                                                self.EodEctractThread.SpecSettings.end_time]))
 
 
 class LifeSpecUpdate(QThread):

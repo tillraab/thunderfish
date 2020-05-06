@@ -1571,9 +1571,9 @@ class MainWindow(QMainWindow):
 
         fd = QFileDialog()
         if os.path.exists('/home/raab/data/'):
-            self.filename, ok = fd.getOpenFileName(self, 'Open File', '/home/raab/data/', 'Select Raw-File (*.raw)')
+            self.filename, ok = fd.getOpenFileName(self, 'Open File', '/home/raab/data/', 'Select Raw-File (*.raw, *.npy)')
         else:
-            self.filename, ok = fd.getOpenFileName(self, 'Open File', '/home/', 'Select Raw-File (*.raw)')
+            self.filename, ok = fd.getOpenFileName(self, 'Open File', '/home/', 'Select Raw-File (*.raw, *.npy)')
 
         if ok:
             self.folder = os.path.split(self.filename)[0]
@@ -1583,18 +1583,60 @@ class MainWindow(QMainWindow):
             self.Act_load.setEnabled(True)
             # self.load_button.setEnabled(True)
 
-            self.data = open_data(self.filename, -1, 60.0, 10.0)
+            if self.filename.endswith('.npy'):
+                self.data = None
+                self.AnalysisDial.data = None
 
-            self.AnalysisDial.data = self.data
+                self.samplerate = 20000
+                self.AnalysisDial.samplerate = 20000
+                self.AnalysisDial.SpecSettings.samplerate = 20000
 
-            self.samplerate= self.data.samplerate
-            self.AnalysisDial.samplerate= self.samplerate
-            self.AnalysisDial.SpecSettings.samplerate= self.samplerate
+                self.channels = 15
+                self.Grid.channels = 15
+                self.AnalysisDial.channels = 15
+                self.AnalysisDial.channel_list = np.arange(self.channels)
+            else:
+                self.data = open_data(self.filename, -1, 60.0, 10.0)
 
-            self.channels = self.data.channels
-            self.Grid.channels = self.data.channels
-            self.AnalysisDial.channels = self.data.channels
-            self.AnalysisDial.channel_list = np.arange(self.channels)
+                self.AnalysisDial.data = self.data
+
+                self.samplerate= self.data.samplerate
+                self.AnalysisDial.samplerate= self.samplerate
+                self.AnalysisDial.SpecSettings.samplerate= self.samplerate
+
+                self.channels = self.data.channels
+                self.Grid.channels = self.data.channels
+                self.AnalysisDial.channels = self.data.channels
+                self.AnalysisDial.channel_list = np.arange(self.channels)
+
+            # print(self.rec_datetime)
+            print('get here')
+        # fd = QFileDialog()
+        # if os.path.exists('/home/raab/data/'):
+        #     self.filename, ok = fd.getOpenFileName(self, 'Open File', '/home/raab/data/', 'Select Raw-File (*.raw)')
+        # else:
+        #     self.filename, ok = fd.getOpenFileName(self, 'Open File', '/home/', 'Select Raw-File (*.raw)')
+        #
+        # if ok:
+        #     self.folder = os.path.split(self.filename)[0]
+        #     self.rec_datetime = get_datetime(self.folder)
+        #     self.Plot.rec_datetime = self.rec_datetime
+        #
+        #     self.Act_load.setEnabled(True)
+        #     # self.load_button.setEnabled(True)
+        #
+        #     self.data = open_data(self.filename, -1, 60.0, 10.0)
+        #
+        #     self.AnalysisDial.data = self.data
+        #
+        #     self.samplerate= self.data.samplerate
+        #     self.AnalysisDial.samplerate= self.samplerate
+        #     self.AnalysisDial.SpecSettings.samplerate= self.samplerate
+        #
+        #     self.channels = self.data.channels
+        #     self.Grid.channels = self.data.channels
+        #     self.AnalysisDial.channels = self.data.channels
+        #     self.AnalysisDial.channel_list = np.arange(self.channels)
 
             # print(self.rec_datetime)
 
