@@ -313,6 +313,8 @@ class EOD_extraxt(QThread):
         self.params()
 
     def params(self):
+
+        self.current_tast = None
         self.samplerate = None
         self.channels = None
         self.channel_list = []
@@ -330,13 +332,111 @@ class EOD_extraxt(QThread):
 
         self.life_plotting = False
 
+        self.folder = None
+        self.all_fund_v = []
+        self.all_ident_v = []
+        self.all_idx_v = []
+        self.all_original_sign_v = []
+
     def run(self):
         self.SpecSettings.apply_settings()
         self.HGSettings.apply_settings()
-        self.snippet_spectrogram()
+        if self.current_tast == 'fill_spec':
+            self.fill_spec()
+        else:
+            self.snippet_spectrogram()
 
-    # def emit_tracking_progress(self, e):
-    #     self.tracking_progress.emit(e)
+    def fill_spec(self):
+        start_idx = int(self.SpecSettings.start_time * self.samplerate)
+        if self.SpecSettings.end_time < 0.0:
+            end_time = len(self.data) / self.samplerate
+            end_idx = int(len(self.data) - 1)
+
+            self.SpecSettings.end_time = end_time
+        else:
+            end_idx = int(self.SpecSettings.end_time * self.samplerate)
+            if end_idx >= int(len(self.data) - 1):
+                end_idx = int(len(self.data) - 1)
+
+        last_run = False
+        get_spec_plot_matrix = False
+
+        p0 = start_idx
+        pn = end_idx
+
+        first_run = True
+        pre_save_spectra = np.array([])
+
+        while start_idx <= end_idx:
+            self.progress.emit((start_idx - p0) / (end_idx - p0) * 100)
+            # self.progress.setValue((start_idx - p0) / (end_idx - p0) * 100)
+
+            if start_idx >= end_idx - self.SpecSettings.data_snippet_idxs:
+                last_run = True
+
+            core_count = multiprocessing.cpu_count()
+            pool = multiprocessing.Pool(core_count - 1)
+            nfft = next_power_of_two(self.samplerate / self.SpecSettings.fresolution)
+
+            func = partial(spectrogram, samplerate=self.samplerate, freq_resolution=self.SpecSettings.fresolution, overlap_frac=self.SpecSettings.overlap_frac)
+
+            if len(np.shape(self.data)) == 1:
+                a = pool.map(func, [self.data[start_idx: start_idx + self.SpecSettings.data_snippet_idxs]])
+            else:
+                a = pool.map(func, [self.data[start_idx: start_idx + self.SpecSettings.data_snippet_idxs, channel] for channel in
+                                    self.channel_list])  # ret: spec, freq, time
+
+            self.spectra = [a[channel][0] for channel in range(len(a))]
+            self.spec_freqs = a[0][1]
+            self.spec_times = a[0][2]
+            pool.terminate()
+
+            self.comb_spectra = np.sum(self.spectra, axis=0)
+            self.tmp_times = self.spec_times + (start_idx / self.samplerate)
+
+            ############################################
+            fill_spec_str = os.path.join('/home/raab/analysis/fine_specs', os.path.split(self.folder)[-1], 'fill_spec.npy')
+            if first_run:
+                first_run = False
+                if not os.path.exists(os.path.join('/home/raab/analysis/fine_specs', os.path.split(self.folder)[-1])):
+                    os.mkdir(os.path.join('/home/raab/analysis/fine_specs', os.path.split(self.folder)[-1]))
+                fill_spec = np.memmap(fill_spec_str, dtype='float', mode='w+',
+                                      shape=(len(self.comb_spectra), len(self.tmp_times)), order='F')
+
+                fill_spec[:, :] = self.comb_spectra
+            else:
+                if len(pre_save_spectra) == 0:
+                    pre_save_spectra = self.comb_spectra
+                else:
+                    pre_save_spectra = np.append(pre_save_spectra, self.comb_spectra, axis=1)
+                if np.shape(pre_save_spectra)[1] >= 500:
+                    old_len = np.shape(fill_spec)[1]
+                    fill_spec = np.memmap(fill_spec_str, dtype='float', mode='r+', shape=(
+                    np.shape(pre_save_spectra)[0], np.shape(pre_save_spectra)[1] + old_len), order='F')
+                    fill_spec[:, old_len:] = pre_save_spectra
+                    pre_save_spectra = np.array([])
+
+            non_overlapping_idx = (1 - self.SpecSettings.overlap_frac) * nfft
+            start_idx += int(len(self.spec_times) * non_overlapping_idx)
+            self.times = np.concatenate((self.times, self.tmp_times))
+
+            if start_idx >= end_idx or last_run:
+                break
+
+        file_str = os.path.split(self.folder)[-1]
+        np.save(os.path.join('/home/raab/analysis/fine_specs', file_str, 'fill_spec_shape.npy'), np.array(np.shape(fill_spec)))
+        np.save(os.path.join('/home/raab/analysis/fine_specs', file_str, 'fill_times.npy'), self.times)
+        np.save(os.path.join('/home/raab/analysis/fine_specs', file_str, 'fill_freqs.npy'), self.spec_freqs)
+
+        print('')
+        print('###   ###')
+        print('')
+        print('fill spec completed')
+        print('')
+        print('###   ###')
+        print('')
+
+        self.quit()
 
     def snippet_spectrogram(self):
         start_idx = int(self.SpecSettings.start_time * self.samplerate)
@@ -634,6 +734,7 @@ class MainWindow(QMainWindow):
         self.gridLayout.addWidget(self.auto_save_cb, 1, 2)
         self.gridLayout.addWidget(self.single_trace_cb, 1, 0)
         self.gridLayout.addWidget(self.HG_B, 3, 0)
+        self.gridLayout.addWidget(self.fill_spec_B, 3, 1)
         self.gridLayout.addWidget(self.Spec_B, 4, 0)
         self.gridLayout.addWidget(self.run_B, 3, 2)
         self.gridLayout.addWidget(self.life_plot_B, 4, 2)
@@ -680,6 +781,9 @@ class MainWindow(QMainWindow):
 
         self.run_B = QPushButton('Run', self.central_widget)
         self.run_B.clicked.connect(self.run_main)
+
+        self.fill_spec_B = QPushButton('Calc. fine spec', self.central_widget)
+        self.fill_spec_B.clicked.connect(self.run_fill_spec)
 
         self.save_B = QPushButton('Save', self.central_widget)
         self.save_B.clicked.connect(self.save)
@@ -744,6 +848,7 @@ class MainWindow(QMainWindow):
         self.all_ident_v = self.EodEctractThread.all_ident_v
         self.all_idx_v = self.EodEctractThread.all_idx_v
         self.all_original_sign_v = self.EodEctractThread.all_original_sign_v
+        self.tmp_spectra_SCH = self.EodEctractThread.tmp_spectra_SCH
 
         self.times = self.EodEctractThread.times
         self.tmp_spectra = self.EodEctractThread.tmp_spectra
@@ -762,6 +867,10 @@ class MainWindow(QMainWindow):
             self.EodEctractThread.params()
             # self.filename, ok = self.filenames[0]
             self.run_main()
+
+    def run_fill_spec(self):
+        self.EodEctractThread.current_tast = 'fill_spec'
+        self.run_main()
 
     @pyqtSlot()
     def run_main(self):
@@ -788,6 +897,7 @@ class MainWindow(QMainWindow):
             self.open_fileL.setText(os.path.join('...', os.path.split(os.path.split(self.filename)[0])[-1]))
 
             self.folder = os.path.split(self.filename)[0]
+            self.EodEctractThread.folder = self.folder
             self.rec_datetime = get_datetime(self.folder)
 
             self.data = open_data(self.filename, -1, 60.0, 10.0)
@@ -801,7 +911,7 @@ class MainWindow(QMainWindow):
             self.channels = self.data.channels - 1
             # self.channels = self.data.channels
             self.EodEctractThread.channels = self.data.channels - 1
-            self.EodEctractThread.channel_list = np.arange(self.channels)
+            self.EodEctractThread.channel_list = np.arange(self.data.channels)
 
             self.open_fileL.setText(os.path.join('...', os.path.split(os.path.split(self.filename)[0])[-1]))
 
@@ -890,27 +1000,58 @@ class MainWindow(QMainWindow):
     def save(self):
         folder = self.folder
         if self.single_trace_cb.isChecked():
-            np.save(os.path.join(folder, 'all_fund_v.npy'), self.all_fund_v)
-            np.save(os.path.join(folder, 'all_sign_v.npy'), self.all_original_sign_v)
-            np.save(os.path.join(folder, 'all_idx_v.npy'), self.all_idx_v)
-            np.save(os.path.join(folder, 'all_ident_v.npy'), self.all_ident_v)
+            try:
+                np.save(os.path.join(folder, 'all_fund_v.npy'), self.all_fund_v)
+                np.save(os.path.join(folder, 'all_sign_v.npy'), self.all_original_sign_v)
+                np.save(os.path.join(folder, 'all_idx_v.npy'), self.all_idx_v)
+                np.save(os.path.join(folder, 'all_ident_v.npy'), self.all_ident_v)
 
-            np.save(os.path.join(folder, 'all_times.npy'), self.times)
-            np.save(os.path.join(folder, 'spec.npy'), self.tmp_spectra)
+                np.save(os.path.join(folder, 'all_times.npy'), self.times)
+                np.save(os.path.join(folder, 'all_spec.npy'), self.tmp_spectra_SCH)
 
-            np.save(os.path.join(folder, 'meta.npy'), np.array([self.EodEctractThread.SpecSettings.start_time,
-                                                                self.EodEctractThread.SpecSettings.end_time]))
+                np.save(os.path.join(folder, 'meta.npy'), np.array([self.EodEctractThread.SpecSettings.start_time,
+                                                                    self.EodEctractThread.SpecSettings.end_time]))
+            except:
+                print('alternative save folder: /home/raab/analysis/<>')
+                folder = os.path.join('/home/raab/analysis', os.path.split(self.folder)[-1])
+                if not os.path.exists(folder):
+                    os.mkdir(folder)
+                np.save(os.path.join(folder, 'all_fund_v.npy'), self.all_fund_v)
+                np.save(os.path.join(folder, 'all_sign_v.npy'), self.all_original_sign_v)
+                np.save(os.path.join(folder, 'all_idx_v.npy'), self.all_idx_v)
+                np.save(os.path.join(folder, 'all_ident_v.npy'), self.all_ident_v)
+
+                np.save(os.path.join(folder, 'all_times.npy'), self.times)
+                np.save(os.path.join(folder, 'all_spec.npy'), self.tmp_spectra_SCH)
+
+                np.save(os.path.join(folder, 'meta.npy'), np.array([self.EodEctractThread.SpecSettings.start_time,
+                                                                    self.EodEctractThread.SpecSettings.end_time]))
 
         else:
-            np.save(os.path.join(folder, 'fund_v.npy'), self.fund_v)
-            np.save(os.path.join(folder, 'sign_v.npy'), self.original_sign_v)
-            np.save(os.path.join(folder, 'idx_v.npy'), self.idx_v)
-            np.save(os.path.join(folder, 'ident_v.npy'), self.ident_v)
-            np.save(os.path.join(folder, 'times.npy'), self.times)
-            np.save(os.path.join(folder, 'spec.npy'), self.tmp_spectra)
+            try:
+                np.save(os.path.join(folder, 'fund_v.npy'), self.fund_v)
+                np.save(os.path.join(folder, 'sign_v.npy'), self.original_sign_v)
+                np.save(os.path.join(folder, 'idx_v.npy'), self.idx_v)
+                np.save(os.path.join(folder, 'ident_v.npy'), self.ident_v)
+                np.save(os.path.join(folder, 'times.npy'), self.times)
+                np.save(os.path.join(folder, 'spec.npy'), self.tmp_spectra)
 
-            np.save(os.path.join(folder, 'meta.npy'), np.array([self.EodEctractThread.SpecSettings.start_time,
-                                                                self.EodEctractThread.SpecSettings.end_time]))
+                np.save(os.path.join(folder, 'meta.npy'), np.array([self.EodEctractThread.SpecSettings.start_time,
+                                                                    self.EodEctractThread.SpecSettings.end_time]))
+            except:
+                print('alternative save folder: /home/raab/analysis/<>')
+                folder = os.path.join('/home/raab/analysis', os.path.split(self.folder)[-1])
+                if not os.path.exists(folder):
+                    os.mkdir(folder)
+                np.save(os.path.join(folder, 'fund_v.npy'), self.fund_v)
+                np.save(os.path.join(folder, 'sign_v.npy'), self.original_sign_v)
+                np.save(os.path.join(folder, 'idx_v.npy'), self.idx_v)
+                np.save(os.path.join(folder, 'ident_v.npy'), self.ident_v)
+                np.save(os.path.join(folder, 'times.npy'), self.times)
+                np.save(os.path.join(folder, 'spec.npy'), self.tmp_spectra)
+
+                np.save(os.path.join(folder, 'meta.npy'), np.array([self.EodEctractThread.SpecSettings.start_time,
+                                                                    self.EodEctractThread.SpecSettings.end_time]))
 
 
 class LifeSpecUpdate(QThread):

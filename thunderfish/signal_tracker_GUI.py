@@ -1192,9 +1192,7 @@ class MainWindow(QMainWindow):
         self.Plot.canvas.draw()
 
     def channel_change(self, i):
-        # self.cb
-        # self.cb_trace_spec
-        # self.cb_SCH_MCH
+
         if self.cb_trace_spec.currentIndex() == 1: # spec
             if self.Plot.spec_img_handle:
                 self.Plot.spec_img_handle.remove()
